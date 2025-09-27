@@ -125,3 +125,48 @@ export interface CreateConfigValueRequest {
   value?: string;
   created_by?: string;
 }
+
+export interface ConfigSnapshot {
+  id: number;
+  name: string;
+  description?: string;
+  application_id: number;
+  environment_id: number;
+  snapshot_type: 'MANUAL' | 'AUTOMATIC' | 'DEPLOYMENT' | 'BACKUP';
+  created_by: string;
+  created_at: string;
+  is_active: boolean;
+  tags?: any; // JSONB
+  metadata?: any; // JSONB
+}
+
+export interface ConfigSnapshotData {
+  id: number;
+  snapshot_id: number;
+  config_key_id?: number; // Optional since it can be null if key is deleted
+  key_name: string;
+  config_file_name: string;
+  group_name?: string;
+  value?: string;
+  encrypted_value?: Uint8Array;
+  data_type: 'string' | 'integer' | 'boolean' | 'json' | 'encrypted';
+  is_sensitive: boolean;
+  created_at: string;
+}
+
+export interface CreateSnapshotRequest {
+  name: string;
+  description?: string;
+  application_id: number;
+  environment_id: number;
+  snapshot_type?: 'MANUAL' | 'AUTOMATIC' | 'DEPLOYMENT' | 'BACKUP';
+  tags?: any;
+  metadata?: any;
+}
+
+export interface SnapshotSummary {
+  snapshot: ConfigSnapshot;
+  total_configs: number;
+  sensitive_configs: number;
+  config_files: string[];
+}

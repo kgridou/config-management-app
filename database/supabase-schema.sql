@@ -111,6 +111,41 @@ CREATE TABLE config_history (
     FOREIGN KEY (config_value_id) REFERENCES config_values(id) ON DELETE CASCADE
 );
 
+-- Configuration snapshots for point-in-time captures
+CREATE TABLE config_snapshots (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(200) NOT NULL,
+    description TEXT,
+    application_id BIGINT NOT NULL,
+    environment_id BIGINT NOT NULL,
+    snapshot_type VARCHAR(20) DEFAULT 'MANUAL' CHECK (snapshot_type IN ('MANUAL', 'AUTOMATIC', 'DEPLOYMENT', 'BACKUP')),
+    created_by VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    tags JSONB, -- For categorization and filtering
+    metadata JSONB, -- Additional snapshot metadata
+    FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE CASCADE,
+    FOREIGN KEY (environment_id) REFERENCES environments(id) ON DELETE CASCADE,
+    UNIQUE(name, application_id, environment_id)
+);
+
+-- Snapshot data - stores the actual configuration values at snapshot time
+CREATE TABLE config_snapshot_data (
+    id BIGSERIAL PRIMARY KEY,
+    snapshot_id BIGINT NOT NULL,
+    config_key_id BIGINT NOT NULL,
+    key_name VARCHAR(200) NOT NULL, -- Denormalized for historical accuracy
+    config_file_name VARCHAR(100) NOT NULL, -- Denormalized for historical accuracy
+    group_name VARCHAR(100), -- Denormalized for historical accuracy
+    value TEXT,
+    encrypted_value BYTEA,
+    data_type VARCHAR(20) NOT NULL,
+    is_sensitive BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    FOREIGN KEY (snapshot_id) REFERENCES config_snapshots(id) ON DELETE CASCADE,
+    FOREIGN KEY (config_key_id) REFERENCES config_keys(id) ON DELETE SET NULL -- Allow orphaned snapshots if key is deleted
+);
+
 -- Indexes for performance
 CREATE INDEX idx_config_values_key_env ON config_values(config_key_id, environment_id);
 CREATE INDEX idx_config_values_active ON config_values(is_active) WHERE is_active = TRUE;
@@ -118,6 +153,11 @@ CREATE INDEX idx_config_history_value_id ON config_history(config_value_id);
 CREATE INDEX idx_config_history_changed_at ON config_history(changed_at);
 CREATE INDEX idx_config_keys_app_id ON config_keys(application_id);
 CREATE INDEX idx_config_keys_sensitive ON config_keys(is_sensitive) WHERE is_sensitive = TRUE;
+CREATE INDEX idx_config_snapshots_app_env ON config_snapshots(application_id, environment_id);
+CREATE INDEX idx_config_snapshots_created_at ON config_snapshots(created_at);
+CREATE INDEX idx_config_snapshots_active ON config_snapshots(is_active) WHERE is_active = TRUE;
+CREATE INDEX idx_config_snapshot_data_snapshot_id ON config_snapshot_data(snapshot_id);
+CREATE INDEX idx_config_snapshot_data_key_id ON config_snapshot_data(config_key_id);
 
 -- Function to automatically update updated_at columns
 CREATE OR REPLACE FUNCTION handle_updated_at()
@@ -175,6 +215,8 @@ ALTER TABLE config_groups ENABLE ROW LEVEL SECURITY;
 ALTER TABLE config_keys ENABLE ROW LEVEL SECURITY;
 ALTER TABLE config_values ENABLE ROW LEVEL SECURITY;
 ALTER TABLE config_history ENABLE ROW LEVEL SECURITY;
+ALTER TABLE config_snapshots ENABLE ROW LEVEL SECURITY;
+ALTER TABLE config_snapshot_data ENABLE ROW LEVEL SECURITY;
 
 -- Allow all operations for authenticated users (adjust as needed for your security requirements)
 CREATE POLICY "Allow all operations for authenticated users" ON users FOR ALL TO authenticated USING (true);
@@ -185,6 +227,8 @@ CREATE POLICY "Allow all operations for authenticated users" ON config_groups FO
 CREATE POLICY "Allow all operations for authenticated users" ON config_keys FOR ALL TO authenticated USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON config_values FOR ALL TO authenticated USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON config_history FOR ALL TO authenticated USING (true);
+CREATE POLICY "Allow all operations for authenticated users" ON config_snapshots FOR ALL TO authenticated USING (true);
+CREATE POLICY "Allow all operations for authenticated users" ON config_snapshot_data FOR ALL TO authenticated USING (true);
 
 -- Schema setup complete
 -- To populate with sample data, run the seed.sql script after this schema is created

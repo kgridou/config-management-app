@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { SupabaseService } from '../../services/supabase.service';
+import { SnapshotsComponent } from '../snapshots/snapshots.component';
 import {
   Application,
   Environment,
@@ -30,7 +31,7 @@ interface ConfigRow {
 @Component({
   selector: 'app-config-management',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SnapshotsComponent],
   template: `
     <div class="container mx-auto px-4 py-8">
       <!-- Header -->
@@ -129,7 +130,35 @@ interface ConfigRow {
         </div>
       </div>
 
-      <!-- Action Buttons -->
+      <!-- Tab Navigation -->
+      <div class="bg-white rounded-lg shadow-md mb-6">
+        <div class="border-b border-gray-200">
+          <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+            <button
+              (click)="activeTab = 'configurations'"
+              [class]="activeTab === 'configurations' ?
+                'border-blue-500 text-blue-600 bg-blue-50' :
+                'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+              class="whitespace-nowrap py-2 px-4 border-b-2 font-medium text-sm transition-colors"
+            >
+              Configuration Values
+            </button>
+            <button
+              (click)="activeTab = 'snapshots'"
+              [class]="activeTab === 'snapshots' ?
+                'border-blue-500 text-blue-600 bg-blue-50' :
+                'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+              class="whitespace-nowrap py-2 px-4 border-b-2 font-medium text-sm transition-colors"
+            >
+              Snapshots
+            </button>
+          </nav>
+        </div>
+      </div>
+
+      <!-- Configuration Values Tab -->
+      <div *ngIf="activeTab === 'configurations'">
+        <!-- Action Buttons -->
       <div class="bg-white p-4 rounded-lg shadow-md mb-6">
         <div class="flex flex-wrap gap-2">
           <button
@@ -582,6 +611,15 @@ interface ConfigRow {
           </div>
         </div>
       </div>
+
+      <!-- Snapshots Tab -->
+      <div *ngIf="activeTab === 'snapshots'">
+        <app-snapshots
+          [application]="application!"
+          [environments]="environments"
+        ></app-snapshots>
+      </div>
+
     </div>
   `
 })
@@ -601,6 +639,7 @@ export class ConfigManagementComponent implements OnInit {
   editingValue: string = '';
   isLoading = false;
   errorMessage = '';
+  activeTab: 'configurations' | 'snapshots' = 'configurations';
 
   // Form states
   showCreateGroupForm = false;

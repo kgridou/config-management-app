@@ -276,4 +276,149 @@ export class SupabaseService {
     if (error) throw error;
     return data;
   }
+
+  // Snapshots
+  async getSnapshots(applicationId: number, environmentId?: number) {
+    let query = this.supabase
+      .from('config_snapshots')
+      .select('*')
+      .eq('application_id', applicationId)
+      .eq('is_active', true);
+
+    if (environmentId) {
+      query = query.eq('environment_id', environmentId);
+    }
+
+    const { data, error } = await query.order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
+  }
+
+  async createSnapshot(request: {
+    name: string;
+    description?: string;
+    application_id: number;
+    environment_id: number;
+    snapshot_type?: 'MANUAL' | 'AUTOMATIC' | 'DEPLOYMENT' | 'BACKUP';
+    tags?: any;
+    metadata?: any;
+  }) {
+    // Get current user email for created_by
+    const { data: { user } } = await this.supabase.auth.getUser();
+    const snapshotToInsert = {
+      ...request,
+      created_by: user?.email || 'unknown'
+    };
+
+    const { data: snapshot, error: snapshotError } = await this.supabase
+      .from('config_snapshots')
+      .insert(snapshotToInsert)
+      .select()
+      .single();
+
+    if (snapshotError) throw snapshotError;
+
+    // Get current config values for this application and environment
+    const { data: configValues, error: valuesError } = await this.supabase
+      .from('config_values')
+      .select(`
+        *,
+        config_keys!inner (
+          key_name,
+          data_type,
+          is_sensitive,
+          config_files!inner (name),
+          config_groups (name)
+        )
+      `)
+      .eq('config_keys.application_id', request.application_id)
+      .eq('environment_id', request.environment_id)
+      .eq('is_active', true);
+
+    if (valuesError) throw valuesError;
+
+    // Create snapshot data entries
+    const snapshotData = configValues.map(cv => ({
+      snapshot_id: snapshot.id,
+      config_key_id: cv.config_key_id,
+      key_name: cv.config_keys?.key_name || '',
+      config_file_name: cv.config_keys?.config_files?.name || '',
+      group_name: cv.config_keys?.config_groups?.name || null,
+      value: cv.config_keys?.is_sensitive ? null : cv.value,
+      encrypted_value: cv.config_keys?.is_sensitive ? cv.encrypted_value : null,
+      data_type: cv.config_keys?.data_type || 'string',
+      is_sensitive: cv.config_keys?.is_sensitive || false
+    }));
+
+    if (snapshotData.length > 0) {
+      const { error: dataError } = await this.supabase
+        .from('config_snapshot_data')
+        .insert(snapshotData);
+
+      if (dataError) throw dataError;
+    }
+
+    return snapshot;
+  }
+
+  async getSnapshotData(snapshotId: number) {
+    const { data, error } = await this.supabase
+      .from('config_snapshot_data')
+      .select('*')
+      .eq('snapshot_id', snapshotId)
+      .order('config_file_name', { ascending: true })
+      .order('group_name', { ascending: true })
+      .order('key_name', { ascending: true });
+
+    if (error) throw error;
+    return data;
+  }
+
+  async deleteSnapshot(snapshotId: number) {
+    const { error } = await this.supabase
+      .from('config_snapshots')
+      .update({ is_active: false })
+      .eq('id', snapshotId);
+
+    if (error) throw error;
+  }
+
+  async restoreFromSnapshot(snapshotId: number, targetEnvironmentId: number) {
+    // Get snapshot data
+    const snapshotData = await this.getSnapshotData(snapshotId);
+
+    // Get current user email
+    const { data: { user } } = await this.supabase.auth.getUser();
+    const userEmail = user?.email || 'unknown';
+
+    for (const item of snapshotData) {
+      if (item.config_key_id) {
+        // Check if config value exists for this key and environment
+        const { data: existingValue } = await this.supabase
+          .from('config_values')
+          .select('id')
+          .eq('config_key_id', item.config_key_id)
+          .eq('environment_id', targetEnvironmentId)
+          .eq('is_active', true)
+          .single();
+
+        if (existingValue) {
+          // Update existing value
+          await this.updateConfigValue(existingValue.id, {
+            value: item.value || undefined,
+            created_by: userEmail
+          });
+        } else {
+          // Create new value
+          await this.createConfigValue({
+            config_key_id: item.config_key_id,
+            environment_id: targetEnvironmentId,
+            value: item.value || undefined,
+            created_by: userEmail
+          });
+        }
+      }
+    }
+  }
 }

@@ -3,6 +3,8 @@
 -- WARNING: This will delete ALL data and tables
 
 -- Drop all tables that might exist (handles any existing tables)
+DROP TABLE IF EXISTS config_snapshot_data CASCADE;
+DROP TABLE IF EXISTS config_snapshots CASCADE;
 DROP TABLE IF EXISTS config_history CASCADE;
 DROP TABLE IF EXISTS config_values CASCADE;
 DROP TABLE IF EXISTS config_keys CASCADE;
