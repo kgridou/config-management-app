@@ -169,7 +169,7 @@ export class AuthService {
     const user = this.currentUser;
     if (!user) return '';
 
-    return user.user_metadata?.full_name ||
+    return user.user_metadata?.['full_name'] ||
            user.email?.split('@')[0] ||
            'User';
   }
