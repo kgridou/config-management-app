@@ -312,7 +312,7 @@ export class ConfigManagementComponent implements OnInit {
   configValues: ConfigValue[] = [];
   configKeys: ConfigKey[] = [];
   configMatrix: ConfigMatrix[] = [];
-  selectedEnvironmentId: number | null = null;
+  selectedEnvironmentId: string = '';
   editingConfigId: number | null = null;
   editingValue: string = '';
   isLoading = false;
@@ -372,7 +372,7 @@ export class ConfigManagementComponent implements OnInit {
       this.errorMessage = '';
       this.configValues = await this.supabaseService.getConfigValues(
         this.applicationId,
-        this.selectedEnvironmentId || undefined
+        this.selectedEnvironmentId !== '' ? Number(this.selectedEnvironmentId) : undefined
       );
     } catch (error: any) {
       this.errorMessage = 'Failed to load configuration values';
@@ -391,8 +391,8 @@ export class ConfigManagementComponent implements OnInit {
     const groupMap = new Map<string, ConfigMatrix>();
 
     // Filter environments based on selection
-    const targetEnvironments = this.selectedEnvironmentId
-      ? this.environments.filter(env => env.id === this.selectedEnvironmentId)
+    const targetEnvironments = this.selectedEnvironmentId !== ''
+      ? this.environments.filter(env => env.id === Number(this.selectedEnvironmentId))
       : this.environments;
 
     // Process each config key
