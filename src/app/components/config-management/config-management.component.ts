@@ -94,9 +94,13 @@ interface ConfigRow {
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">
             Group Filter
+            <span *ngIf="selectedConfigFileId" class="text-xs text-gray-500">
+              (for {{ getSelectedFileName() }})
+            </span>
           </label>
           <div class="flex flex-wrap gap-2">
             <button
+              *ngIf="selectedConfigFileId"
               (click)="selectGroup('')"
               [class]="selectedGroupId === '' ?
                 'bg-blue-100 text-blue-800 border-blue-300' :
@@ -115,8 +119,11 @@ interface ConfigRow {
             >
               {{ group.name }}
             </button>
-            <div *ngIf="configGroups.length === 0" class="text-sm text-gray-500 italic">
-              No groups found. Create a group first.
+            <div *ngIf="!selectedConfigFileId" class="text-sm text-gray-500 italic">
+              Select a configuration file to see its groups
+            </div>
+            <div *ngIf="selectedConfigFileId && configGroups.length === 0" class="text-sm text-gray-500 italic">
+              No groups in this file. Create a group first.
             </div>
           </div>
         </div>
@@ -127,17 +134,26 @@ interface ConfigRow {
         <div class="flex flex-wrap gap-2">
           <button
             (click)="showCreateGroupForm = !showCreateGroupForm"
-            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium"
+            [disabled]="!selectedConfigFileId"
+            [class]="!selectedConfigFileId ?
+              'bg-gray-400 cursor-not-allowed text-white px-4 py-2 rounded-lg font-medium' :
+              'bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium'"
           >
             {{ showCreateGroupForm ? 'Cancel' : 'Add Group' }}
           </button>
           <button
             (click)="showCreateKeyForm = !showCreateKeyForm"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium"
+            [disabled]="!selectedConfigFileId"
+            [class]="!selectedConfigFileId ?
+              'bg-gray-400 cursor-not-allowed text-white px-4 py-2 rounded-lg font-medium' :
+              'bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium'"
           >
             {{ showCreateKeyForm ? 'Cancel' : 'Add Config Key' }}
           </button>
         </div>
+        <p *ngIf="!selectedConfigFileId" class="text-sm text-gray-500 mt-2">
+          Select a configuration file to manage groups and keys
+        </p>
       </div>
 
       <!-- Create Group Form -->
@@ -997,17 +1013,21 @@ export class ConfigManagementComponent implements OnInit {
 
   // Group management methods
   async createGroup() {
-    if (!this.newGroup.name.trim()) return;
+    if (!this.newGroup.name.trim() || !this.selectedConfigFileId) return;
 
     try {
       this.isLoading = true;
       this.errorMessage = '';
+
+      // Set the config_file_id to the currently selected file
+      this.newGroup.config_file_id = Number(this.selectedConfigFileId);
+
       await this.supabaseService.createConfigGroup(this.newGroup);
       await this.loadConfigGroups();
       this.showCreateGroupForm = false;
       this.newGroup = {
         name: '',
-        application_id: this.applicationId,
+        config_file_id: 0,
         description: ''
       };
     } catch (error: any) {
