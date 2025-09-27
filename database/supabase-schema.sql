@@ -170,6 +170,7 @@ CREATE TRIGGER config_values_audit_trigger
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE applications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE environments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE config_files ENABLE ROW LEVEL SECURITY;
 ALTER TABLE config_groups ENABLE ROW LEVEL SECURITY;
 ALTER TABLE config_keys ENABLE ROW LEVEL SECURITY;
 ALTER TABLE config_values ENABLE ROW LEVEL SECURITY;
@@ -179,6 +180,7 @@ ALTER TABLE config_history ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow all operations for authenticated users" ON users FOR ALL TO authenticated USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON applications FOR ALL TO authenticated USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON environments FOR ALL TO authenticated USING (true);
+CREATE POLICY "Allow all operations for authenticated users" ON config_files FOR ALL TO authenticated USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON config_groups FOR ALL TO authenticated USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON config_keys FOR ALL TO authenticated USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON config_values FOR ALL TO authenticated USING (true);
