@@ -155,9 +155,9 @@ export class LoginComponent {
         this.errorMessage = error.message || 'Failed to sign in';
       } else if (data.user) {
         this.successMessage = 'Signed in successfully!';
-        // Redirect to main app
+        // Redirect to dashboard
         setTimeout(() => {
-          this.router.navigate(['/applications']);
+          this.router.navigate(['/dashboard']);
         }, 1000);
       }
     } catch (error: any) {
