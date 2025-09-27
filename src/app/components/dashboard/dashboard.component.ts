@@ -135,7 +135,7 @@ interface DashboardStats {
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Recent Activity</h3>
                 <div class="bg-white shadow overflow-hidden sm:rounded-md">
                   <ul class="divide-y divide-gray-200">
-                    <li *ngFor="let change of stats.recentChanges.slice(0, 5)" class="px-6 py-4">
+                    <li *ngFor="let change of stats!.recentChanges.slice(0, 5)" class="px-6 py-4">
                       <div class="flex items-center justify-between">
                         <div class="flex items-center">
                           <div class="flex-shrink-0 h-2 w-2 bg-green-400 rounded-full"></div>
