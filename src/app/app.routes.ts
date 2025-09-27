@@ -39,11 +39,6 @@ export const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
-    path: 'apps/:id/keys',
-    loadComponent: () => import('./components/config-keys/config-keys.component').then(m => m.ConfigKeysComponent),
-    canActivate: [AuthGuard]
-  },
-  {
     path: '**',
     redirectTo: '/dashboard'
   }

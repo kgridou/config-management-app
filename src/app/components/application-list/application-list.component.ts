@@ -103,13 +103,7 @@ import { Application, CreateApplicationRequest } from '../../models/config.model
               [routerLink]="['/apps', app.id, 'configs']"
               class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-sm text-sm font-medium"
             >
-              Manage Configs
-            </a>
-            <a
-              [routerLink]="['/apps', app.id, 'keys']"
-              class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded-sm text-sm font-medium"
-            >
-              Config Keys
+              Manage Config
             </a>
           </div>
         </div>

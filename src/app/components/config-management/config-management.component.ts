@@ -9,7 +9,10 @@ import {
   ConfigValue,
   ConfigKey,
   ConfigFile,
-  CreateConfigValueRequest
+  ConfigGroup,
+  CreateConfigValueRequest,
+  CreateConfigKeyRequest,
+  CreateConfigGroupRequest
 } from '../../models/config.models';
 
 interface ConfigMatrix {
@@ -86,6 +89,212 @@ interface ConfigRow {
             Select a configuration file to view its settings
           </p>
         </div>
+
+        <!-- Group Filter -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Group Filter
+          </label>
+          <div class="flex flex-wrap gap-2">
+            <button
+              (click)="selectGroup('')"
+              [class]="selectedGroupId === '' ?
+                'bg-blue-100 text-blue-800 border-blue-300' :
+                'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'"
+              class="px-3 py-1 border rounded-md text-sm font-medium transition-colors"
+            >
+              All Groups
+            </button>
+            <button
+              *ngFor="let group of configGroups"
+              (click)="selectGroup(group.id.toString())"
+              [class]="selectedGroupId === group.id.toString() ?
+                'bg-blue-100 text-blue-800 border-blue-300' :
+                'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'"
+              class="px-3 py-1 border rounded-md text-sm font-medium transition-colors"
+            >
+              {{ group.name }}
+            </button>
+            <div *ngIf="configGroups.length === 0" class="text-sm text-gray-500 italic">
+              No groups found. Create a group first.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="bg-white p-4 rounded-lg shadow-md mb-6">
+        <div class="flex flex-wrap gap-2">
+          <button
+            (click)="showCreateGroupForm = !showCreateGroupForm"
+            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium"
+          >
+            {{ showCreateGroupForm ? 'Cancel' : 'Add Group' }}
+          </button>
+          <button
+            (click)="showCreateKeyForm = !showCreateKeyForm"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium"
+          >
+            {{ showCreateKeyForm ? 'Cancel' : 'Add Config Key' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Create Group Form -->
+      <div *ngIf="showCreateGroupForm" class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <h2 class="text-xl font-semibold mb-4">Create New Group</h2>
+        <form (ngSubmit)="createGroup()" #groupForm="ngForm">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="groupName" class="block text-sm font-medium text-gray-700 mb-2">
+                Group Name
+              </label>
+              <input
+                type="text"
+                id="groupName"
+                name="groupName"
+                [(ngModel)]="newGroup.name"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+                placeholder="e.g., database, api, security"
+              >
+            </div>
+            <div>
+              <label for="groupDescription" class="block text-sm font-medium text-gray-700 mb-2">
+                Description
+              </label>
+              <input
+                type="text"
+                id="groupDescription"
+                name="groupDescription"
+                [(ngModel)]="newGroup.description"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+                placeholder="Brief description of this group"
+              >
+            </div>
+          </div>
+          <div class="flex justify-end mt-4">
+            <button
+              type="submit"
+              [disabled]="!groupForm.valid || isLoading"
+              class="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-md font-medium"
+            >
+              {{ isLoading ? 'Creating...' : 'Create Group' }}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Create Config Key Form -->
+      <div *ngIf="showCreateKeyForm" class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <h2 class="text-xl font-semibold mb-4">Create New Configuration Key</h2>
+        <form (ngSubmit)="createConfigKey()" #keyForm="ngForm">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <label for="keyName" class="block text-sm font-medium text-gray-700 mb-2">
+                Key Name
+              </label>
+              <input
+                type="text"
+                id="keyName"
+                name="keyName"
+                [(ngModel)]="newConfigKey.key_name"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+                placeholder="e.g., db.host, api.timeout"
+              >
+            </div>
+            <div>
+              <label for="dataType" class="block text-sm font-medium text-gray-700 mb-2">
+                Data Type
+              </label>
+              <select
+                id="dataType"
+                name="dataType"
+                [(ngModel)]="newConfigKey.data_type"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="string">String</option>
+                <option value="integer">Integer</option>
+                <option value="boolean">Boolean</option>
+                <option value="json">JSON</option>
+                <option value="encrypted">Encrypted</option>
+              </select>
+            </div>
+            <div>
+              <label for="group" class="block text-sm font-medium text-gray-700 mb-2">
+                Group
+              </label>
+              <select
+                id="group"
+                name="group"
+                [(ngModel)]="newConfigKey.group_id"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+              >
+                <option [value]="null">No Group</option>
+                <option *ngFor="let group of configGroups" [value]="group.id">
+                  {{ group.name }}
+                </option>
+              </select>
+            </div>
+            <div>
+              <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+                Description
+              </label>
+              <input
+                type="text"
+                id="description"
+                name="description"
+                [(ngModel)]="newConfigKey.description"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+                placeholder="Brief description of this configuration"
+              >
+            </div>
+            <div>
+              <label for="defaultValue" class="block text-sm font-medium text-gray-700 mb-2">
+                Default Value
+              </label>
+              <input
+                type="text"
+                id="defaultValue"
+                name="defaultValue"
+                [(ngModel)]="newConfigKey.default_value"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+                placeholder="Optional default value"
+              >
+            </div>
+            <div class="flex items-center space-x-4">
+              <label class="flex items-center">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="newConfigKey.is_required"
+                  name="isRequired"
+                  class="rounded-sm border-gray-300 text-blue-600 focus:ring-blue-500"
+                >
+                <span class="ml-2 text-sm text-gray-700">Required</span>
+              </label>
+              <label class="flex items-center">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="newConfigKey.is_sensitive"
+                  name="isSensitive"
+                  class="rounded-sm border-gray-300 text-blue-600 focus:ring-blue-500"
+                >
+                <span class="ml-2 text-sm text-gray-700">Sensitive</span>
+              </label>
+            </div>
+          </div>
+          <div class="flex justify-end mt-4">
+            <button
+              type="submit"
+              [disabled]="!keyForm.valid || isLoading"
+              class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-md font-medium"
+            >
+              {{ isLoading ? 'Creating...' : 'Create Config Key' }}
+            </button>
+          </div>
+        </form>
       </div>
 
       <!-- Error Message -->
@@ -367,13 +576,38 @@ export class ConfigManagementComponent implements OnInit {
   configValues: ConfigValue[] = [];
   configKeys: ConfigKey[] = [];
   configFiles: ConfigFile[] = [];
+  configGroups: ConfigGroup[] = [];
   configMatrix: ConfigMatrix[] = [];
   selectedEnvironmentId: string = '';
   selectedConfigFileId: string = '';
+  selectedGroupId: string = '';
   editingConfigId: number | null = null;
   editingValue: string = '';
   isLoading = false;
   errorMessage = '';
+
+  // Form states
+  showCreateGroupForm = false;
+  showCreateKeyForm = false;
+
+  // Form data
+  newGroup: CreateConfigGroupRequest = {
+    name: '',
+    application_id: 0,
+    description: ''
+  };
+
+  newConfigKey: CreateConfigKeyRequest = {
+    key_name: '',
+    config_file_id: 1,
+    group_id: undefined,
+    application_id: 0,
+    data_type: 'string',
+    description: '',
+    default_value: '',
+    is_required: true,
+    is_sensitive: false
+  };
 
   constructor(
     private route: ActivatedRoute,
@@ -382,6 +616,8 @@ export class ConfigManagementComponent implements OnInit {
 
   async ngOnInit() {
     this.applicationId = Number(this.route.snapshot.paramMap.get('id'));
+    this.newGroup.application_id = this.applicationId;
+    this.newConfigKey.application_id = this.applicationId;
     await this.loadData();
   }
 
@@ -389,7 +625,8 @@ export class ConfigManagementComponent implements OnInit {
     await Promise.all([
       this.loadApplication(),
       this.loadEnvironments(),
-      this.loadConfigFiles()
+      this.loadConfigFiles(),
+      this.loadConfigGroups()
     ]);
     await this.loadConfigKeys();
     await this.loadConfigValues();
@@ -425,6 +662,15 @@ export class ConfigManagementComponent implements OnInit {
     } catch (error: any) {
       this.errorMessage = 'Failed to load configuration files';
       console.error('Error loading config files:', error);
+    }
+  }
+
+  async loadConfigGroups() {
+    try {
+      this.configGroups = await this.supabaseService.getConfigGroups(this.applicationId);
+    } catch (error: any) {
+      this.errorMessage = 'Failed to load configuration groups';
+      console.error('Error loading config groups:', error);
     }
   }
 
@@ -475,8 +721,13 @@ export class ConfigManagementComponent implements OnInit {
       ? this.environments.filter(env => env.id === Number(this.selectedEnvironmentId))
       : this.environments;
 
+    // Filter config keys based on group selection
+    const filteredKeys = this.selectedGroupId !== ''
+      ? this.configKeys.filter(key => key.group_id?.toString() === this.selectedGroupId)
+      : this.configKeys;
+
     // Process each config key
-    this.configKeys.forEach(key => {
+    filteredKeys.forEach(key => {
       const groupName = key.config_groups?.name || 'No Group';
       const groupId = key.group_id || null;
 
@@ -738,4 +989,71 @@ export class ConfigManagementComponent implements OnInit {
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
   }
+
+  // Group management methods
+  async createGroup() {
+    if (!this.newGroup.name.trim()) return;
+
+    try {
+      this.isLoading = true;
+      this.errorMessage = '';
+      await this.supabaseService.createConfigGroup(this.newGroup);
+      await this.loadConfigGroups();
+      this.showCreateGroupForm = false;
+      this.newGroup = {
+        name: '',
+        application_id: this.applicationId,
+        description: ''
+      };
+    } catch (error: any) {
+      this.errorMessage = 'Failed to create configuration group';
+      console.error('Error creating group:', error);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  // Config key management methods
+  async createConfigKey() {
+    if (!this.newConfigKey.key_name.trim()) return;
+
+    try {
+      this.isLoading = true;
+      this.errorMessage = '';
+
+      // Set config_file_id to selected file
+      if (this.selectedConfigFileId) {
+        this.newConfigKey.config_file_id = Number(this.selectedConfigFileId);
+      }
+
+      await this.supabaseService.createConfigKey(this.newConfigKey);
+      await this.loadConfigKeys();
+      await this.loadConfigValues();
+      this.buildConfigMatrix();
+      this.showCreateKeyForm = false;
+      this.newConfigKey = {
+        key_name: '',
+        config_file_id: this.selectedConfigFileId ? Number(this.selectedConfigFileId) : 1,
+        group_id: undefined,
+        application_id: this.applicationId,
+        data_type: 'string',
+        description: '',
+        default_value: '',
+        is_required: true,
+        is_sensitive: false
+      };
+    } catch (error: any) {
+      this.errorMessage = 'Failed to create configuration key';
+      console.error('Error creating config key:', error);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  // Filter methods
+  selectGroup(groupId: string) {
+    this.selectedGroupId = groupId;
+    this.buildConfigMatrix();
+  }
+
 }
