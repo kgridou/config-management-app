@@ -6,7 +6,7 @@ import { ConfigService } from './config.service';
   providedIn: 'root'
 })
 export class SupabaseService {
-  private supabase: SupabaseClient;
+  private supabase!: SupabaseClient;
 
   constructor(private configService: ConfigService) {
     this.initializeSupabase();
