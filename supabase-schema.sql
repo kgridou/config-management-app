@@ -154,25 +154,5 @@ CREATE POLICY "Allow all operations for authenticated users" ON config_keys FOR 
 CREATE POLICY "Allow all operations for authenticated users" ON config_values FOR ALL TO authenticated USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON config_history FOR ALL TO authenticated USING (true);
 
--- Sample data for demonstration
-INSERT INTO applications (name, description) VALUES
-    ('web-api', 'Main web API service'),
-    ('worker-service', 'Background job processing service'),
-    ('frontend-app', 'React frontend application');
-
-INSERT INTO environments (name, description, priority) VALUES
-    ('development', 'Development environment', 1),
-    ('staging', 'Staging environment', 2),
-    ('production', 'Production environment', 3);
-
-INSERT INTO config_groups (name, application_id, description) VALUES
-    ('database', 1, 'Database configuration'),
-    ('api', 1, 'API configuration'),
-    ('security', 1, 'Security settings');
-
-INSERT INTO config_keys (key_name, group_id, application_id, data_type, description, is_required, is_sensitive) VALUES
-    ('db.host', 1, 1, 'string', 'Database hostname', TRUE, FALSE),
-    ('db.port', 1, 1, 'integer', 'Database port', TRUE, FALSE),
-    ('db.password', 1, 1, 'encrypted', 'Database password', TRUE, TRUE),
-    ('api.rate_limit', 2, 1, 'integer', 'API rate limit per minute', TRUE, FALSE),
-    ('jwt.secret', 3, 1, 'encrypted', 'JWT signing secret', TRUE, TRUE);
+-- Schema setup complete
+-- To populate with sample data, run the seed.sql script after this schema is created
