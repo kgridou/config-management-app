@@ -27,6 +27,11 @@ export class AuthService {
 
   private async initializeAuth() {
     try {
+      // Wait for SupabaseService to initialize
+      while (!this.supabaseService.client) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+
       // Get initial session
       const { data: { session }, error } = await this.supabaseService.client.auth.getSession();
 
