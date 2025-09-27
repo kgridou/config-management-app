@@ -121,31 +121,31 @@ BEGIN
         ('db.ssl_mode', (SELECT id FROM config_files WHERE name = 'database.json' AND application_id = ecommerce_id), (SELECT id FROM config_groups WHERE name = 'database' AND application_id = ecommerce_id), ecommerce_id, 'string', 'SSL connection mode', 'require', true, false),
         ('db.pool_size', (SELECT id FROM config_files WHERE name = 'database.json' AND application_id = ecommerce_id), (SELECT id FROM config_groups WHERE name = 'database' AND application_id = ecommerce_id), ecommerce_id, 'integer', 'Connection pool size', '10', false, false),
 
-        -- Redis group
-        ('redis.host', (SELECT id FROM config_groups WHERE name = 'redis' AND application_id = ecommerce_id), ecommerce_id, 'string', 'Redis hostname', 'localhost', true, false),
-        ('redis.port', (SELECT id FROM config_groups WHERE name = 'redis' AND application_id = ecommerce_id), ecommerce_id, 'integer', 'Redis port', '6379', true, false),
-        ('redis.password', (SELECT id FROM config_groups WHERE name = 'redis' AND application_id = ecommerce_id), ecommerce_id, 'encrypted', 'Redis password', null, false, true),
-        ('redis.db_index', (SELECT id FROM config_groups WHERE name = 'redis' AND application_id = ecommerce_id), ecommerce_id, 'integer', 'Redis database index', '0', false, false),
-        ('redis.ttl', (SELECT id FROM config_groups WHERE name = 'redis' AND application_id = ecommerce_id), ecommerce_id, 'integer', 'Default TTL in seconds', '3600', false, false),
+        -- Redis group (api.yaml)
+        ('redis.host', (SELECT id FROM config_files WHERE name = 'api.yaml' AND application_id = ecommerce_id), (SELECT id FROM config_groups WHERE name = 'redis' AND application_id = ecommerce_id), ecommerce_id, 'string', 'Redis hostname', 'localhost', true, false),
+        ('redis.port', (SELECT id FROM config_files WHERE name = 'api.yaml' AND application_id = ecommerce_id), (SELECT id FROM config_groups WHERE name = 'redis' AND application_id = ecommerce_id), ecommerce_id, 'integer', 'Redis port', '6379', true, false),
+        ('redis.password', (SELECT id FROM config_files WHERE name = 'api.yaml' AND application_id = ecommerce_id), (SELECT id FROM config_groups WHERE name = 'redis' AND application_id = ecommerce_id), ecommerce_id, 'encrypted', 'Redis password', null, false, true),
+        ('redis.db_index', (SELECT id FROM config_files WHERE name = 'api.yaml' AND application_id = ecommerce_id), (SELECT id FROM config_groups WHERE name = 'redis' AND application_id = ecommerce_id), ecommerce_id, 'integer', 'Redis database index', '0', false, false),
+        ('redis.ttl', (SELECT id FROM config_files WHERE name = 'api.yaml' AND application_id = ecommerce_id), (SELECT id FROM config_groups WHERE name = 'redis' AND application_id = ecommerce_id), ecommerce_id, 'integer', 'Default TTL in seconds', '3600', false, false),
 
-        -- API group
-        ('api.port', (SELECT id FROM config_groups WHERE name = 'api' AND application_id = ecommerce_id), ecommerce_id, 'integer', 'API server port', '3000', true, false),
-        ('api.rate_limit', (SELECT id FROM config_groups WHERE name = 'api' AND application_id = ecommerce_id), ecommerce_id, 'integer', 'Requests per minute', '1000', true, false),
-        ('api.timeout', (SELECT id FROM config_groups WHERE name = 'api' AND application_id = ecommerce_id), ecommerce_id, 'integer', 'Request timeout in seconds', '30', false, false),
-        ('api.cors_origins', (SELECT id FROM config_groups WHERE name = 'api' AND application_id = ecommerce_id), ecommerce_id, 'json', 'Allowed CORS origins', '["*"]', true, false),
+        -- API group (api.yaml)
+        ('api.port', (SELECT id FROM config_files WHERE name = 'api.yaml' AND application_id = ecommerce_id), (SELECT id FROM config_groups WHERE name = 'api' AND application_id = ecommerce_id), ecommerce_id, 'integer', 'API server port', '3000', true, false),
+        ('api.rate_limit', (SELECT id FROM config_files WHERE name = 'api.yaml' AND application_id = ecommerce_id), (SELECT id FROM config_groups WHERE name = 'api' AND application_id = ecommerce_id), ecommerce_id, 'integer', 'Requests per minute', '1000', true, false),
+        ('api.timeout', (SELECT id FROM config_files WHERE name = 'api.yaml' AND application_id = ecommerce_id), (SELECT id FROM config_groups WHERE name = 'api' AND application_id = ecommerce_id), ecommerce_id, 'integer', 'Request timeout in seconds', '30', false, false),
+        ('api.cors_origins', (SELECT id FROM config_files WHERE name = 'api.yaml' AND application_id = ecommerce_id), (SELECT id FROM config_groups WHERE name = 'api' AND application_id = ecommerce_id), ecommerce_id, 'json', 'Allowed CORS origins', '["*"]', true, false),
 
-        -- Security group
-        ('jwt.secret', (SELECT id FROM config_groups WHERE name = 'security' AND application_id = ecommerce_id), ecommerce_id, 'encrypted', 'JWT signing secret', null, true, true),
-        ('jwt.expiry', (SELECT id FROM config_groups WHERE name = 'security' AND application_id = ecommerce_id), ecommerce_id, 'string', 'JWT token expiry', '24h', true, false),
-        ('bcrypt.rounds', (SELECT id FROM config_groups WHERE name = 'security' AND application_id = ecommerce_id), ecommerce_id, 'integer', 'Bcrypt hash rounds', '12', true, false),
-        ('session.secret', (SELECT id FROM config_groups WHERE name = 'security' AND application_id = ecommerce_id), ecommerce_id, 'encrypted', 'Session secret key', null, true, true),
+        -- Security group (security.env)
+        ('jwt.secret', (SELECT id FROM config_files WHERE name = 'security.env' AND application_id = ecommerce_id), (SELECT id FROM config_groups WHERE name = 'security' AND application_id = ecommerce_id), ecommerce_id, 'encrypted', 'JWT signing secret', null, true, true),
+        ('jwt.expiry', (SELECT id FROM config_files WHERE name = 'security.env' AND application_id = ecommerce_id), (SELECT id FROM config_groups WHERE name = 'security' AND application_id = ecommerce_id), ecommerce_id, 'string', 'JWT token expiry', '24h', true, false),
+        ('bcrypt.rounds', (SELECT id FROM config_files WHERE name = 'security.env' AND application_id = ecommerce_id), (SELECT id FROM config_groups WHERE name = 'security' AND application_id = ecommerce_id), ecommerce_id, 'integer', 'Bcrypt hash rounds', '12', true, false),
+        ('session.secret', (SELECT id FROM config_files WHERE name = 'security.env' AND application_id = ecommerce_id), (SELECT id FROM config_groups WHERE name = 'security' AND application_id = ecommerce_id), ecommerce_id, 'encrypted', 'Session secret key', null, true, true),
 
-        -- External services group
-        ('stripe.public_key', (SELECT id FROM config_groups WHERE name = 'external-services' AND application_id = ecommerce_id), ecommerce_id, 'string', 'Stripe publishable key', null, true, false),
-        ('stripe.secret_key', (SELECT id FROM config_groups WHERE name = 'external-services' AND application_id = ecommerce_id), ecommerce_id, 'encrypted', 'Stripe secret key', null, true, true),
-        ('aws.region', (SELECT id FROM config_groups WHERE name = 'external-services' AND application_id = ecommerce_id), ecommerce_id, 'string', 'AWS region', 'us-east-1', true, false),
-        ('aws.access_key', (SELECT id FROM config_groups WHERE name = 'external-services' AND application_id = ecommerce_id), ecommerce_id, 'encrypted', 'AWS access key', null, true, true),
-        ('aws.secret_key', (SELECT id FROM config_groups WHERE name = 'external-services' AND application_id = ecommerce_id), ecommerce_id, 'encrypted', 'AWS secret key', null, true, true);
+        -- External services group (external-services.json)
+        ('stripe.public_key', (SELECT id FROM config_files WHERE name = 'external-services.json' AND application_id = ecommerce_id), (SELECT id FROM config_groups WHERE name = 'external-services' AND application_id = ecommerce_id), ecommerce_id, 'string', 'Stripe publishable key', null, true, false),
+        ('stripe.secret_key', (SELECT id FROM config_files WHERE name = 'external-services.json' AND application_id = ecommerce_id), (SELECT id FROM config_groups WHERE name = 'external-services' AND application_id = ecommerce_id), ecommerce_id, 'encrypted', 'Stripe secret key', null, true, true),
+        ('aws.region', (SELECT id FROM config_files WHERE name = 'external-services.json' AND application_id = ecommerce_id), (SELECT id FROM config_groups WHERE name = 'external-services' AND application_id = ecommerce_id), ecommerce_id, 'string', 'AWS region', 'us-east-1', true, false),
+        ('aws.access_key', (SELECT id FROM config_files WHERE name = 'external-services.json' AND application_id = ecommerce_id), (SELECT id FROM config_groups WHERE name = 'external-services' AND application_id = ecommerce_id), ecommerce_id, 'encrypted', 'AWS access key', null, true, true),
+        ('aws.secret_key', (SELECT id FROM config_files WHERE name = 'external-services.json' AND application_id = ecommerce_id), (SELECT id FROM config_groups WHERE name = 'external-services' AND application_id = ecommerce_id), ecommerce_id, 'encrypted', 'AWS secret key', null, true, true);
 
     -- Create configuration keys for user-service
     INSERT INTO config_keys (key_name, config_file_id, group_id, application_id, data_type, description, default_value, is_required, is_sensitive) VALUES
