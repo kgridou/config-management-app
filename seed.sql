@@ -2,6 +2,12 @@
 -- Run this after the main schema has been created and RLS policies are set up
 -- This will populate your database with sample applications, environments, and configurations
 
+-- Insert sample user
+INSERT INTO users (email, full_name, avatar_url, last_login, is_active) VALUES
+    ('admin@company.com', 'System Administrator', 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face', timezone('utc'::text, now()), true),
+    ('john.doe@company.com', 'John Doe', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face', timezone('utc'::text, now()) - interval '2 hours', true),
+    ('jane.smith@company.com', 'Jane Smith', 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face', timezone('utc'::text, now()) - interval '1 day', true);
+
 -- Insert sample applications
 INSERT INTO applications (name, description) VALUES
     ('e-commerce-api', 'Main e-commerce REST API service'),
@@ -150,28 +156,28 @@ BEGIN
     -- Development environment values
     INSERT INTO config_values (config_key_id, environment_id, value, created_by) VALUES
         -- E-commerce API - Development
-        ((SELECT id FROM config_keys WHERE key_name = 'db.host' AND application_id = ecommerce_id), dev_env_id, 'localhost', 'seed-script'),
-        ((SELECT id FROM config_keys WHERE key_name = 'db.port' AND application_id = ecommerce_id), dev_env_id, '5432', 'seed-script'),
-        ((SELECT id FROM config_keys WHERE key_name = 'db.name' AND application_id = ecommerce_id), dev_env_id, 'ecommerce_dev', 'seed-script'),
-        ((SELECT id FROM config_keys WHERE key_name = 'db.username' AND application_id = ecommerce_id), dev_env_id, 'dev_user', 'seed-script'),
-        ((SELECT id FROM config_keys WHERE key_name = 'db.password' AND application_id = ecommerce_id), dev_env_id, 'dev_password_123', 'seed-script'),
-        ((SELECT id FROM config_keys WHERE key_name = 'db.ssl_mode' AND application_id = ecommerce_id), dev_env_id, 'disable', 'seed-script'),
-        ((SELECT id FROM config_keys WHERE key_name = 'db.pool_size' AND application_id = ecommerce_id), dev_env_id, '5', 'seed-script'),
+        ((SELECT id FROM config_keys WHERE key_name = 'db.host' AND application_id = ecommerce_id), dev_env_id, 'localhost', 'john.doe@company.com'),
+        ((SELECT id FROM config_keys WHERE key_name = 'db.port' AND application_id = ecommerce_id), dev_env_id, '5432', 'john.doe@company.com'),
+        ((SELECT id FROM config_keys WHERE key_name = 'db.name' AND application_id = ecommerce_id), dev_env_id, 'ecommerce_dev', 'john.doe@company.com'),
+        ((SELECT id FROM config_keys WHERE key_name = 'db.username' AND application_id = ecommerce_id), dev_env_id, 'dev_user', 'john.doe@company.com'),
+        ((SELECT id FROM config_keys WHERE key_name = 'db.password' AND application_id = ecommerce_id), dev_env_id, 'dev_password_123', 'john.doe@company.com'),
+        ((SELECT id FROM config_keys WHERE key_name = 'db.ssl_mode' AND application_id = ecommerce_id), dev_env_id, 'disable', 'john.doe@company.com'),
+        ((SELECT id FROM config_keys WHERE key_name = 'db.pool_size' AND application_id = ecommerce_id), dev_env_id, '5', 'jane.smith@company.com'),
 
-        ((SELECT id FROM config_keys WHERE key_name = 'redis.host' AND application_id = ecommerce_id), dev_env_id, 'localhost', 'seed-script'),
-        ((SELECT id FROM config_keys WHERE key_name = 'redis.port' AND application_id = ecommerce_id), dev_env_id, '6379', 'seed-script'),
-        ((SELECT id FROM config_keys WHERE key_name = 'redis.db_index' AND application_id = ecommerce_id), dev_env_id, '0', 'seed-script'),
-        ((SELECT id FROM config_keys WHERE key_name = 'redis.ttl' AND application_id = ecommerce_id), dev_env_id, '1800', 'seed-script'),
+        ((SELECT id FROM config_keys WHERE key_name = 'redis.host' AND application_id = ecommerce_id), dev_env_id, 'localhost', 'jane.smith@company.com'),
+        ((SELECT id FROM config_keys WHERE key_name = 'redis.port' AND application_id = ecommerce_id), dev_env_id, '6379', 'jane.smith@company.com'),
+        ((SELECT id FROM config_keys WHERE key_name = 'redis.db_index' AND application_id = ecommerce_id), dev_env_id, '0', 'jane.smith@company.com'),
+        ((SELECT id FROM config_keys WHERE key_name = 'redis.ttl' AND application_id = ecommerce_id), dev_env_id, '1800', 'jane.smith@company.com'),
 
-        ((SELECT id FROM config_keys WHERE key_name = 'api.port' AND application_id = ecommerce_id), dev_env_id, '3000', 'seed-script'),
-        ((SELECT id FROM config_keys WHERE key_name = 'api.rate_limit' AND application_id = ecommerce_id), dev_env_id, '5000', 'seed-script'),
-        ((SELECT id FROM config_keys WHERE key_name = 'api.timeout' AND application_id = ecommerce_id), dev_env_id, '60', 'seed-script'),
-        ((SELECT id FROM config_keys WHERE key_name = 'api.cors_origins' AND application_id = ecommerce_id), dev_env_id, '["http://localhost:3000", "http://localhost:4200"]', 'seed-script'),
+        ((SELECT id FROM config_keys WHERE key_name = 'api.port' AND application_id = ecommerce_id), dev_env_id, '3000', 'admin@company.com'),
+        ((SELECT id FROM config_keys WHERE key_name = 'api.rate_limit' AND application_id = ecommerce_id), dev_env_id, '5000', 'admin@company.com'),
+        ((SELECT id FROM config_keys WHERE key_name = 'api.timeout' AND application_id = ecommerce_id), dev_env_id, '60', 'admin@company.com'),
+        ((SELECT id FROM config_keys WHERE key_name = 'api.cors_origins' AND application_id = ecommerce_id), dev_env_id, '["http://localhost:3000", "http://localhost:4200"]', 'admin@company.com'),
 
-        ((SELECT id FROM config_keys WHERE key_name = 'jwt.secret' AND application_id = ecommerce_id), dev_env_id, 'dev-jwt-secret-key-123', 'seed-script'),
-        ((SELECT id FROM config_keys WHERE key_name = 'jwt.expiry' AND application_id = ecommerce_id), dev_env_id, '7d', 'seed-script'),
-        ((SELECT id FROM config_keys WHERE key_name = 'bcrypt.rounds' AND application_id = ecommerce_id), dev_env_id, '10', 'seed-script'),
-        ((SELECT id FROM config_keys WHERE key_name = 'session.secret' AND application_id = ecommerce_id), dev_env_id, 'dev-session-secret-456', 'seed-script');
+        ((SELECT id FROM config_keys WHERE key_name = 'jwt.secret' AND application_id = ecommerce_id), dev_env_id, 'dev-jwt-secret-key-123', 'admin@company.com'),
+        ((SELECT id FROM config_keys WHERE key_name = 'jwt.expiry' AND application_id = ecommerce_id), dev_env_id, '7d', 'admin@company.com'),
+        ((SELECT id FROM config_keys WHERE key_name = 'bcrypt.rounds' AND application_id = ecommerce_id), dev_env_id, '10', 'admin@company.com'),
+        ((SELECT id FROM config_keys WHERE key_name = 'session.secret' AND application_id = ecommerce_id), dev_env_id, 'dev-session-secret-456', 'admin@company.com');
 
     -- Production environment values (more secure)
     INSERT INTO config_values (config_key_id, environment_id, value, created_by) VALUES
