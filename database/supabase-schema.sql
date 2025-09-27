@@ -36,6 +36,20 @@ CREATE TABLE environments (
     is_active BOOLEAN DEFAULT TRUE
 );
 
+-- Configuration files for grouping related configs into downloadable files
+CREATE TABLE config_files (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL, -- e.g., database.json, api.yaml, auth.env
+    application_id BIGINT NOT NULL,
+    file_format VARCHAR(20) DEFAULT 'json' CHECK (file_format IN ('json', 'yaml', 'env', 'properties')),
+    description TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE CASCADE,
+    UNIQUE(name, application_id)
+);
+
 -- Configuration groups for organizing related configs
 CREATE TABLE config_groups (
     id BIGSERIAL PRIMARY KEY,
@@ -51,6 +65,7 @@ CREATE TABLE config_groups (
 CREATE TABLE config_keys (
     id BIGSERIAL PRIMARY KEY,
     key_name VARCHAR(200) NOT NULL,
+    config_file_id BIGINT NOT NULL,
     group_id BIGINT,
     application_id BIGINT NOT NULL,
     data_type VARCHAR(20) NOT NULL CHECK (data_type IN ('string', 'integer', 'boolean', 'json', 'encrypted')),
@@ -61,9 +76,10 @@ CREATE TABLE config_keys (
     validation_regex VARCHAR(500),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    FOREIGN KEY (config_file_id) REFERENCES config_files(id) ON DELETE CASCADE,
     FOREIGN KEY (group_id) REFERENCES config_groups(id) ON DELETE SET NULL,
     FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE CASCADE,
-    UNIQUE(key_name, application_id)
+    UNIQUE(key_name, config_file_id)
 );
 
 -- Actual configuration values per environment

@@ -82,15 +82,43 @@ BEGIN
         ('webhooks', payment_id, 'Webhook configurations'),
         ('limits', payment_id, 'Transaction limits and rules');
 
+    -- Create configuration files for e-commerce-api
+    INSERT INTO config_files (name, application_id, file_format, description) VALUES
+        ('database.json', ecommerce_id, 'json', 'Database configuration settings'),
+        ('api.yaml', ecommerce_id, 'yaml', 'API configuration and limits'),
+        ('security.env', ecommerce_id, 'env', 'Security and authentication settings'),
+        ('external-services.json', ecommerce_id, 'json', 'Third-party service integrations');
+
+    -- Create configuration files for user-service
+    INSERT INTO config_files (name, application_id, file_format, description) VALUES
+        ('database.json', user_service_id, 'json', 'User database configuration'),
+        ('auth.yaml', user_service_id, 'yaml', 'Authentication providers'),
+        ('session.env', user_service_id, 'env', 'Session management'),
+        ('security.json', user_service_id, 'json', 'Security policies');
+
+    -- Create configuration files for notification-service
+    INSERT INTO config_files (name, application_id, file_format, description) VALUES
+        ('email.json', notification_id, 'json', 'Email service configuration'),
+        ('sms.yaml', notification_id, 'yaml', 'SMS provider settings'),
+        ('templates.json', notification_id, 'json', 'Message templates'),
+        ('queue.env', notification_id, 'env', 'Message queue settings');
+
+    -- Create configuration files for payment-gateway
+    INSERT INTO config_files (name, application_id, file_format, description) VALUES
+        ('providers.json', payment_id, 'json', 'Payment provider configurations'),
+        ('security.env', payment_id, 'env', 'PCI compliance and security'),
+        ('webhooks.yaml', payment_id, 'yaml', 'Webhook configurations'),
+        ('limits.json', payment_id, 'json', 'Transaction limits and rules');
+
     -- Create configuration keys for e-commerce-api
-    INSERT INTO config_keys (key_name, group_id, application_id, data_type, description, default_value, is_required, is_sensitive) VALUES
-        -- Database group
-        ('db.host', (SELECT id FROM config_groups WHERE name = 'database' AND application_id = ecommerce_id), ecommerce_id, 'string', 'Database hostname', 'localhost', true, false),
-        ('db.port', (SELECT id FROM config_groups WHERE name = 'database' AND application_id = ecommerce_id), ecommerce_id, 'integer', 'Database port', '5432', true, false),
-        ('db.name', (SELECT id FROM config_groups WHERE name = 'database' AND application_id = ecommerce_id), ecommerce_id, 'string', 'Database name', 'ecommerce', true, false),
-        ('db.username', (SELECT id FROM config_groups WHERE name = 'database' AND application_id = ecommerce_id), ecommerce_id, 'string', 'Database username', 'postgres', true, false),
-        ('db.password', (SELECT id FROM config_groups WHERE name = 'database' AND application_id = ecommerce_id), ecommerce_id, 'encrypted', 'Database password', null, true, true),
-        ('db.ssl_mode', (SELECT id FROM config_groups WHERE name = 'database' AND application_id = ecommerce_id), ecommerce_id, 'string', 'SSL connection mode', 'require', true, false),
+    INSERT INTO config_keys (key_name, config_file_id, group_id, application_id, data_type, description, default_value, is_required, is_sensitive) VALUES
+        -- Database group (database.json)
+        ('db.host', (SELECT id FROM config_files WHERE name = 'database.json' AND application_id = ecommerce_id), (SELECT id FROM config_groups WHERE name = 'database' AND application_id = ecommerce_id), ecommerce_id, 'string', 'Database hostname', 'localhost', true, false),
+        ('db.port', (SELECT id FROM config_files WHERE name = 'database.json' AND application_id = ecommerce_id), (SELECT id FROM config_groups WHERE name = 'database' AND application_id = ecommerce_id), ecommerce_id, 'integer', 'Database port', '5432', true, false),
+        ('db.name', (SELECT id FROM config_files WHERE name = 'database.json' AND application_id = ecommerce_id), (SELECT id FROM config_groups WHERE name = 'database' AND application_id = ecommerce_id), ecommerce_id, 'string', 'Database name', 'ecommerce', true, false),
+        ('db.username', (SELECT id FROM config_files WHERE name = 'database.json' AND application_id = ecommerce_id), (SELECT id FROM config_groups WHERE name = 'database' AND application_id = ecommerce_id), ecommerce_id, 'string', 'Database username', 'postgres', true, false),
+        ('db.password', (SELECT id FROM config_files WHERE name = 'database.json' AND application_id = ecommerce_id), (SELECT id FROM config_groups WHERE name = 'database' AND application_id = ecommerce_id), ecommerce_id, 'encrypted', 'Database password', null, true, true),
+        ('db.ssl_mode', (SELECT id FROM config_files WHERE name = 'database.json' AND application_id = ecommerce_id), (SELECT id FROM config_groups WHERE name = 'database' AND application_id = ecommerce_id), ecommerce_id, 'string', 'SSL connection mode', 'require', true, false),
         ('db.pool_size', (SELECT id FROM config_groups WHERE name = 'database' AND application_id = ecommerce_id), ecommerce_id, 'integer', 'Connection pool size', '10', false, false),
 
         -- Redis group
@@ -120,37 +148,37 @@ BEGIN
         ('aws.secret_key', (SELECT id FROM config_groups WHERE name = 'external-services' AND application_id = ecommerce_id), ecommerce_id, 'encrypted', 'AWS secret key', null, true, true);
 
     -- Create configuration keys for user-service
-    INSERT INTO config_keys (key_name, group_id, application_id, data_type, description, default_value, is_required, is_sensitive) VALUES
-        -- Database group
-        ('db.host', (SELECT id FROM config_groups WHERE name = 'database' AND application_id = user_service_id), user_service_id, 'string', 'User database hostname', 'localhost', true, false),
-        ('db.port', (SELECT id FROM config_groups WHERE name = 'database' AND application_id = user_service_id), user_service_id, 'integer', 'User database port', '5432', true, false),
-        ('db.name', (SELECT id FROM config_groups WHERE name = 'database' AND application_id = user_service_id), user_service_id, 'string', 'User database name', 'users', true, false),
-        ('db.password', (SELECT id FROM config_groups WHERE name = 'database' AND application_id = user_service_id), user_service_id, 'encrypted', 'User database password', null, true, true),
+    INSERT INTO config_keys (key_name, config_file_id, group_id, application_id, data_type, description, default_value, is_required, is_sensitive) VALUES
+        -- Database group (database.json)
+        ('db.host', (SELECT id FROM config_files WHERE name = 'database.json' AND application_id = user_service_id), (SELECT id FROM config_groups WHERE name = 'database' AND application_id = user_service_id), user_service_id, 'string', 'User database hostname', 'localhost', true, false),
+        ('db.port', (SELECT id FROM config_files WHERE name = 'database.json' AND application_id = user_service_id), (SELECT id FROM config_groups WHERE name = 'database' AND application_id = user_service_id), user_service_id, 'integer', 'User database port', '5432', true, false),
+        ('db.name', (SELECT id FROM config_files WHERE name = 'database.json' AND application_id = user_service_id), (SELECT id FROM config_groups WHERE name = 'database' AND application_id = user_service_id), user_service_id, 'string', 'User database name', 'users', true, false),
+        ('db.password', (SELECT id FROM config_files WHERE name = 'database.json' AND application_id = user_service_id), (SELECT id FROM config_groups WHERE name = 'database' AND application_id = user_service_id), user_service_id, 'encrypted', 'User database password', null, true, true),
 
-        -- Auth group
-        ('oauth.google.client_id', (SELECT id FROM config_groups WHERE name = 'auth' AND application_id = user_service_id), user_service_id, 'string', 'Google OAuth client ID', null, false, false),
-        ('oauth.google.client_secret', (SELECT id FROM config_groups WHERE name = 'auth' AND application_id = user_service_id), user_service_id, 'encrypted', 'Google OAuth client secret', null, false, true),
-        ('oauth.github.client_id', (SELECT id FROM config_groups WHERE name = 'auth' AND application_id = user_service_id), user_service_id, 'string', 'GitHub OAuth client ID', null, false, false),
-        ('oauth.github.client_secret', (SELECT id FROM config_groups WHERE name = 'auth' AND application_id = user_service_id), user_service_id, 'encrypted', 'GitHub OAuth client secret', null, false, true),
+        -- Auth group (auth.yaml)
+        ('oauth.google.client_id', (SELECT id FROM config_files WHERE name = 'auth.yaml' AND application_id = user_service_id), (SELECT id FROM config_groups WHERE name = 'auth' AND application_id = user_service_id), user_service_id, 'string', 'Google OAuth client ID', null, false, false),
+        ('oauth.google.client_secret', (SELECT id FROM config_files WHERE name = 'auth.yaml' AND application_id = user_service_id), (SELECT id FROM config_groups WHERE name = 'auth' AND application_id = user_service_id), user_service_id, 'encrypted', 'Google OAuth client secret', null, false, true),
+        ('oauth.github.client_id', (SELECT id FROM config_files WHERE name = 'auth.yaml' AND application_id = user_service_id), (SELECT id FROM config_groups WHERE name = 'auth' AND application_id = user_service_id), user_service_id, 'string', 'GitHub OAuth client ID', null, false, false),
+        ('oauth.github.client_secret', (SELECT id FROM config_files WHERE name = 'auth.yaml' AND application_id = user_service_id), (SELECT id FROM config_groups WHERE name = 'auth' AND application_id = user_service_id), user_service_id, 'encrypted', 'GitHub OAuth client secret', null, false, true),
 
-        -- Session group
-        ('session.timeout', (SELECT id FROM config_groups WHERE name = 'session' AND application_id = user_service_id), user_service_id, 'integer', 'Session timeout in minutes', '60', true, false),
-        ('session.cleanup_interval', (SELECT id FROM config_groups WHERE name = 'session' AND application_id = user_service_id), user_service_id, 'integer', 'Session cleanup interval in minutes', '15', false, false);
+        -- Session group (session.env)
+        ('session.timeout', (SELECT id FROM config_files WHERE name = 'session.env' AND application_id = user_service_id), (SELECT id FROM config_groups WHERE name = 'session' AND application_id = user_service_id), user_service_id, 'integer', 'Session timeout in minutes', '60', true, false),
+        ('session.cleanup_interval', (SELECT id FROM config_files WHERE name = 'session.env' AND application_id = user_service_id), (SELECT id FROM config_groups WHERE name = 'session' AND application_id = user_service_id), user_service_id, 'integer', 'Session cleanup interval in minutes', '15', false, false);
 
     -- Create configuration keys for notification-service
-    INSERT INTO config_keys (key_name, group_id, application_id, data_type, description, default_value, is_required, is_sensitive) VALUES
-        -- Email group
-        ('smtp.host', (SELECT id FROM config_groups WHERE name = 'email' AND application_id = notification_id), notification_id, 'string', 'SMTP server hostname', 'smtp.gmail.com', true, false),
-        ('smtp.port', (SELECT id FROM config_groups WHERE name = 'email' AND application_id = notification_id), notification_id, 'integer', 'SMTP server port', '587', true, false),
-        ('smtp.username', (SELECT id FROM config_groups WHERE name = 'email' AND application_id = notification_id), notification_id, 'string', 'SMTP username', null, true, false),
-        ('smtp.password', (SELECT id FROM config_groups WHERE name = 'email' AND application_id = notification_id), notification_id, 'encrypted', 'SMTP password', null, true, true),
-        ('email.from_address', (SELECT id FROM config_groups WHERE name = 'email' AND application_id = notification_id), notification_id, 'string', 'Default from email address', 'noreply@company.com', true, false),
+    INSERT INTO config_keys (key_name, config_file_id, group_id, application_id, data_type, description, default_value, is_required, is_sensitive) VALUES
+        -- Email group (email.json)
+        ('smtp.host', (SELECT id FROM config_files WHERE name = 'email.json' AND application_id = notification_id), (SELECT id FROM config_groups WHERE name = 'email' AND application_id = notification_id), notification_id, 'string', 'SMTP server hostname', 'smtp.gmail.com', true, false),
+        ('smtp.port', (SELECT id FROM config_files WHERE name = 'email.json' AND application_id = notification_id), (SELECT id FROM config_groups WHERE name = 'email' AND application_id = notification_id), notification_id, 'integer', 'SMTP server port', '587', true, false),
+        ('smtp.username', (SELECT id FROM config_files WHERE name = 'email.json' AND application_id = notification_id), (SELECT id FROM config_groups WHERE name = 'email' AND application_id = notification_id), notification_id, 'string', 'SMTP username', null, true, false),
+        ('smtp.password', (SELECT id FROM config_files WHERE name = 'email.json' AND application_id = notification_id), (SELECT id FROM config_groups WHERE name = 'email' AND application_id = notification_id), notification_id, 'encrypted', 'SMTP password', null, true, true),
+        ('email.from_address', (SELECT id FROM config_files WHERE name = 'email.json' AND application_id = notification_id), (SELECT id FROM config_groups WHERE name = 'email' AND application_id = notification_id), notification_id, 'string', 'Default from email address', 'noreply@company.com', true, false),
 
-        -- SMS group
-        ('sms.provider', (SELECT id FROM config_groups WHERE name = 'sms' AND application_id = notification_id), notification_id, 'string', 'SMS provider (twilio/aws)', 'twilio', true, false),
-        ('twilio.account_sid', (SELECT id FROM config_groups WHERE name = 'sms' AND application_id = notification_id), notification_id, 'string', 'Twilio Account SID', null, false, false),
-        ('twilio.auth_token', (SELECT id FROM config_groups WHERE name = 'sms' AND application_id = notification_id), notification_id, 'encrypted', 'Twilio Auth Token', null, false, true),
-        ('twilio.phone_number', (SELECT id FROM config_groups WHERE name = 'sms' AND application_id = notification_id), notification_id, 'string', 'Twilio phone number', null, false, false);
+        -- SMS group (sms.yaml)
+        ('sms.provider', (SELECT id FROM config_files WHERE name = 'sms.yaml' AND application_id = notification_id), (SELECT id FROM config_groups WHERE name = 'sms' AND application_id = notification_id), notification_id, 'string', 'SMS provider (twilio/aws)', 'twilio', true, false),
+        ('twilio.account_sid', (SELECT id FROM config_files WHERE name = 'sms.yaml' AND application_id = notification_id), (SELECT id FROM config_groups WHERE name = 'sms' AND application_id = notification_id), notification_id, 'string', 'Twilio Account SID', null, false, false),
+        ('twilio.auth_token', (SELECT id FROM config_files WHERE name = 'sms.yaml' AND application_id = notification_id), (SELECT id FROM config_groups WHERE name = 'sms' AND application_id = notification_id), notification_id, 'encrypted', 'Twilio Auth Token', null, false, true),
+        ('twilio.phone_number', (SELECT id FROM config_files WHERE name = 'sms.yaml' AND application_id = notification_id), (SELECT id FROM config_groups WHERE name = 'sms' AND application_id = notification_id), notification_id, 'string', 'Twilio phone number', null, false, false);
 
     -- Now create configuration values for different environments
     -- Development environment values
