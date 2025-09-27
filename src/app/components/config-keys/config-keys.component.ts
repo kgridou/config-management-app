@@ -332,6 +332,7 @@ export class ConfigKeysComponent implements OnInit {
 
   newConfigKey: CreateConfigKeyRequest = {
     key_name: '',
+    config_file_id: 1,
     application_id: 0,
     data_type: 'string',
     description: '',
@@ -435,6 +436,7 @@ export class ConfigKeysComponent implements OnInit {
   resetKeyForm() {
     this.newConfigKey = {
       key_name: '',
+      config_file_id: 1,
       application_id: this.applicationId,
       data_type: 'string',
       description: '',
