@@ -158,9 +158,16 @@ export class SupabaseService {
     value?: string;
     created_by?: string;
   }) {
+    // Get current user email for created_by if not provided
+    const { data: { user } } = await this.supabase.auth.getUser();
+    const valueToInsert = {
+      ...configValue,
+      created_by: configValue.created_by || user?.email || 'unknown'
+    };
+
     const { data, error } = await this.supabase
       .from('config_values')
-      .insert(configValue)
+      .insert(valueToInsert)
       .select()
       .single();
 
@@ -172,9 +179,16 @@ export class SupabaseService {
     value?: string;
     created_by?: string;
   }) {
+    // Get current user email for created_by if not provided
+    const { data: { user } } = await this.supabase.auth.getUser();
+    const updatesToApply = {
+      ...updates,
+      created_by: updates.created_by || user?.email || 'unknown'
+    };
+
     const { data, error } = await this.supabase
       .from('config_values')
-      .update(updates)
+      .update(updatesToApply)
       .eq('id', id)
       .select()
       .single();

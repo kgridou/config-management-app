@@ -1,25 +1,44 @@
 import { Routes } from '@angular/router';
+import { AuthGuard, GuestGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: '/applications',
+    redirectTo: '/auth/login',
     pathMatch: 'full'
   },
   {
+    path: 'auth/login',
+    loadComponent: () => import('./components/auth/login/login.component').then(m => m.LoginComponent),
+    canActivate: [GuestGuard]
+  },
+  {
+    path: 'auth/register',
+    loadComponent: () => import('./components/auth/register/register.component').then(m => m.RegisterComponent),
+    canActivate: [GuestGuard]
+  },
+  {
+    path: 'auth/forgot-password',
+    loadComponent: () => import('./components/auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent),
+    canActivate: [GuestGuard]
+  },
+  {
     path: 'applications',
-    loadComponent: () => import('./components/application-list/application-list.component').then(m => m.ApplicationListComponent)
+    loadComponent: () => import('./components/application-list/application-list.component').then(m => m.ApplicationListComponent),
+    canActivate: [AuthGuard]
   },
   {
     path: 'apps/:id/configs',
-    loadComponent: () => import('./components/config-management/config-management.component').then(m => m.ConfigManagementComponent)
+    loadComponent: () => import('./components/config-management/config-management.component').then(m => m.ConfigManagementComponent),
+    canActivate: [AuthGuard]
   },
   {
     path: 'apps/:id/keys',
-    loadComponent: () => import('./components/config-keys/config-keys.component').then(m => m.ConfigKeysComponent)
+    loadComponent: () => import('./components/config-keys/config-keys.component').then(m => m.ConfigKeysComponent),
+    canActivate: [AuthGuard]
   },
   {
     path: '**',
-    redirectTo: '/applications'
+    redirectTo: '/auth/login'
   }
 ];
