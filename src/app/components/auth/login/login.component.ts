@@ -25,12 +25,12 @@ import { AuthService } from '../../../services/auth.service';
 
         <form class="mt-8 space-y-6" (ngSubmit)="onSubmit()">
           <!-- Error Message -->
-          <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-sm">
             {{ errorMessage }}
           </div>
 
           <!-- Success Message -->
-          <div *ngIf="successMessage" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+          <div *ngIf="successMessage" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-sm">
             {{ successMessage }}
           </div>
 
@@ -46,7 +46,7 @@ import { AuthService } from '../../../services/auth.service';
                 autocomplete="email"
                 required
                 [(ngModel)]="formData.email"
-                class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-hidden focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Enter your email"
               >
             </div>
@@ -62,7 +62,7 @@ import { AuthService } from '../../../services/auth.service';
                 autocomplete="current-password"
                 required
                 [(ngModel)]="formData.password"
-                class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-hidden focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Enter your password"
               >
             </div>
@@ -74,7 +74,7 @@ import { AuthService } from '../../../services/auth.service';
                 id="remember-me"
                 name="remember-me"
                 type="checkbox"
-                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded-sm"
               >
               <label for="remember-me" class="ml-2 block text-sm text-gray-900">
                 Remember me
@@ -92,7 +92,7 @@ import { AuthService } from '../../../services/auth.service';
             <button
               type="submit"
               [disabled]="isLoading"
-              class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               <span class="absolute left-0 inset-y-0 flex items-center pl-3">
                 <svg *ngIf="!isLoading" class="h-5 w-5 text-blue-500 group-hover:text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">

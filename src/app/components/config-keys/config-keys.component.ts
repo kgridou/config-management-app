@@ -57,7 +57,7 @@ import {
                 name="groupName"
                 [(ngModel)]="newGroup.name"
                 required
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                 placeholder="e.g., database, api, security"
               >
             </div>
@@ -70,7 +70,7 @@ import {
                 id="groupDescription"
                 name="groupDescription"
                 [(ngModel)]="newGroup.description"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                 placeholder="Brief description of this group"
               >
             </div>
@@ -109,7 +109,7 @@ import {
                 name="keyName"
                 [(ngModel)]="newConfigKey.key_name"
                 required
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                 placeholder="e.g., db.host, api.timeout"
               >
             </div>
@@ -122,7 +122,7 @@ import {
                 name="dataType"
                 [(ngModel)]="newConfigKey.data_type"
                 required
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Select type</option>
                 <option value="string">String</option>
@@ -140,7 +140,7 @@ import {
                 id="group"
                 name="group"
                 [(ngModel)]="newConfigKey.group_id"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">No Group</option>
                 <option *ngFor="let group of configGroups" [value]="group.id">
@@ -157,7 +157,7 @@ import {
                 id="description"
                 name="description"
                 [(ngModel)]="newConfigKey.description"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                 placeholder="Brief description of this configuration"
               >
             </div>
@@ -170,7 +170,7 @@ import {
                 id="defaultValue"
                 name="defaultValue"
                 [(ngModel)]="newConfigKey.default_value"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                 placeholder="Optional default value"
               >
             </div>
@@ -182,7 +182,7 @@ import {
                 type="checkbox"
                 [(ngModel)]="newConfigKey.is_required"
                 name="isRequired"
-                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                class="rounded-sm border-gray-300 text-blue-600 focus:ring-blue-500"
               >
               <span class="ml-2 text-sm text-gray-700">Required</span>
             </label>
@@ -191,7 +191,7 @@ import {
                 type="checkbox"
                 [(ngModel)]="newConfigKey.is_sensitive"
                 name="isSensitive"
-                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                class="rounded-sm border-gray-300 text-blue-600 focus:ring-blue-500"
               >
               <span class="ml-2 text-sm text-gray-700">Sensitive (password, API key, etc.)</span>
             </label>
@@ -217,7 +217,7 @@ import {
       </div>
 
       <!-- Error Message -->
-      <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+      <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-sm mb-6">
         {{ errorMessage }}
       </div>
 
@@ -289,11 +289,11 @@ import {
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex space-x-2">
                     <span *ngIf="key.is_required"
-                          class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                          class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-red-100 text-red-800">
                       Required
                     </span>
                     <span *ngIf="key.is_sensitive"
-                          class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                          class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-yellow-100 text-yellow-800">
                       Sensitive
                     </span>
                   </div>

@@ -8,11 +8,11 @@ import { AuthService } from '../../services/auth.service';
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <nav class="bg-white shadow-sm border-b border-gray-200">
+    <nav class="bg-white shadow-xs border-b border-gray-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
           <div class="flex">
-            <div class="flex-shrink-0 flex items-center">
+            <div class="shrink-0 flex items-center">
               <a routerLink="/" class="text-xl font-bold text-gray-900">
                 Config Manager
               </a>
@@ -57,7 +57,7 @@ import { AuthService } from '../../services/auth.service';
                 <div class="relative">
                   <button
                     (click)="showUserMenu = !showUserMenu"
-                    class="bg-white rounded-full flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    class="bg-white rounded-full flex text-sm focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
                     <span class="sr-only">Open user menu</span>
                     <div class="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
@@ -70,7 +70,7 @@ import { AuthService } from '../../services/auth.service';
                   <!-- User dropdown menu -->
                   <div
                     *ngIf="showUserMenu"
-                    class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
+                    class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-hidden z-50"
                   >
                     <div class="py-1">
                       <a
@@ -120,7 +120,7 @@ import { AuthService } from '../../services/auth.service';
       <div class="sm:hidden">
         <button
           (click)="showMobileMenu = !showMobileMenu"
-          class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+          class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-hidden focus:ring-2 focus:ring-inset focus:ring-blue-500"
         >
           <span class="sr-only">Open main menu</span>
           <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -35,7 +35,7 @@ import {
           id="environment"
           [(ngModel)]="selectedEnvironmentId"
           (change)="onEnvironmentChange()"
-          class="w-full md:w-auto px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="w-full md:w-auto px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
         >
           <option value="">All Environments</option>
           <option *ngFor="let env of environments" [value]="env.id">
@@ -45,7 +45,7 @@ import {
       </div>
 
       <!-- Error Message -->
-      <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+      <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-sm mb-6">
         {{ errorMessage }}
       </div>
 
@@ -100,7 +100,7 @@ import {
                     <input
                       type="text"
                       [(ngModel)]="editingValue"
-                      class="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
+                      class="flex-1 px-2 py-1 border border-gray-300 rounded-sm text-sm"
                       [placeholder]="configValue.config_keys?.default_value || 'Enter value'"
                     >
                     <button
@@ -172,7 +172,7 @@ import {
       <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="bg-white p-6 rounded-lg shadow-md">
           <div class="flex items-center">
-            <div class="flex-shrink-0">
+            <div class="shrink-0">
               <div class="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center">
                 <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5l7-7 7 7" />
@@ -190,7 +190,7 @@ import {
 
         <div class="bg-white p-6 rounded-lg shadow-md">
           <div class="flex items-center">
-            <div class="flex-shrink-0">
+            <div class="shrink-0">
               <div class="w-8 h-8 bg-green-100 rounded-md flex items-center justify-center">
                 <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
@@ -208,7 +208,7 @@ import {
 
         <div class="bg-white p-6 rounded-lg shadow-md">
           <div class="flex items-center">
-            <div class="flex-shrink-0">
+            <div class="shrink-0">
               <div class="w-8 h-8 bg-yellow-100 rounded-md flex items-center justify-center">
                 <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
