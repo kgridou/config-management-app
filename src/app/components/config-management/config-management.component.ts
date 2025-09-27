@@ -11,6 +11,17 @@ import {
   CreateConfigValueRequest
 } from '../../models/config.models';
 
+interface ConfigMatrix {
+  groupName: string;
+  groupId: number | null;
+  keys: ConfigKeyRow[];
+}
+
+interface ConfigKeyRow {
+  key: ConfigKey;
+  values: { [environmentId: number]: ConfigValue | null };
+}
+
 @Component({
   selector: 'app-config-management',
   standalone: true,
@@ -26,10 +37,10 @@ import {
         <p *ngIf="application?.description" class="text-gray-600">{{ application?.description }}</p>
       </div>
 
-      <!-- Environment Selector -->
+      <!-- Environment Filter -->
       <div class="bg-white p-4 rounded-lg shadow-md mb-6">
         <label for="environment" class="block text-sm font-medium text-gray-700 mb-2">
-          Select Environment
+          Environment Filter
         </label>
         <select
           id="environment"
@@ -42,6 +53,9 @@ import {
             {{ env.name }} (Priority: {{ env.priority }})
           </option>
         </select>
+        <p class="text-sm text-gray-500 mt-1">
+          Select an environment to view only its configurations, or leave blank to see all environments in matrix view
+        </p>
       </div>
 
       <!-- Error Message -->
@@ -49,121 +63,160 @@ import {
         {{ errorMessage }}
       </div>
 
-      <!-- Configuration Values Table -->
+      <!-- Configuration Matrix -->
       <div class="bg-white rounded-lg shadow-md overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200">
-          <h2 class="text-xl font-semibold text-gray-900">Configuration Values</h2>
+          <h2 class="text-xl font-semibold text-gray-900">Configuration Matrix</h2>
+          <p class="text-sm text-gray-500 mt-1">
+            {{ selectedEnvironmentId ? 'Single environment view' : 'All environments matrix view' }}
+          </p>
         </div>
 
         <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Configuration Key
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Environment
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Value
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Type
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
                   Group
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">
+                  Configuration Key
+                </th>
+                <th *ngFor="let env of getDisplayEnvironments()"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-32">
+                  <div class="flex items-center space-x-2">
+                    <span>{{ env.name }}</span>
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium"
+                          [class]="getEnvironmentBadgeClass(env.name)">
+                      P{{ env.priority }}
+                    </span>
+                  </div>
                 </th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr *ngFor="let configValue of configValues" class="hover:bg-gray-50">
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-gray-900">
-                    {{ configValue.config_keys?.key_name }}
-                  </div>
-                  <div *ngIf="configValue.config_keys?.description" class="text-sm text-gray-500">
-                    {{ configValue.config_keys?.description }}
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                        [class]="getEnvironmentBadgeClass(configValue.environments?.name)">
-                    {{ configValue.environments?.name }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div *ngIf="editingConfigId === configValue.id" class="flex items-center space-x-2">
-                    <input
-                      type="text"
-                      [(ngModel)]="editingValue"
-                      class="flex-1 px-2 py-1 border border-gray-300 rounded-sm text-sm"
-                      [placeholder]="configValue.config_keys?.default_value || 'Enter value'"
-                    >
-                    <button
-                      (click)="saveConfigValue(configValue.id)"
-                      class="text-green-600 hover:text-green-800 text-sm"
-                    >
-                      Save
-                    </button>
-                    <button
-                      (click)="cancelEdit()"
-                      class="text-gray-600 hover:text-gray-800 text-sm"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                  <div *ngIf="editingConfigId !== configValue.id">
-                    <span *ngIf="configValue.config_keys?.is_sensitive" class="text-gray-500">
-                      ••••••••
-                    </span>
-                    <span *ngIf="!configValue.config_keys?.is_sensitive" class="text-sm text-gray-900">
-                      {{ configValue.value || 'Not set' }}
-                    </span>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium"
-                        [class]="getDataTypeBadgeClass(configValue.config_keys?.data_type)">
-                    {{ configValue.config_keys?.data_type }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {{ configValue.config_keys?.config_groups?.name || 'No Group' }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button
-                    *ngIf="editingConfigId !== configValue.id"
-                    (click)="startEdit(configValue)"
-                    class="text-blue-600 hover:text-blue-900 mr-3"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    (click)="viewHistory(configValue.id)"
-                    class="text-gray-600 hover:text-gray-900"
-                  >
-                    History
-                  </button>
-                </td>
-              </tr>
+              <ng-container *ngFor="let group of configMatrix; trackBy: trackByGroup">
+                <tr *ngFor="let keyRow of group.keys; let keyIndex = index; trackBy: trackByKey"
+                    class="hover:bg-gray-50">
+
+                  <!-- Group Cell (with rowspan for first key in group) -->
+                  <td *ngIf="keyIndex === 0"
+                      [attr.rowspan]="group.keys.length"
+                      class="px-6 py-4 align-top border-r border-gray-100 bg-gray-25">
+                    <div class="text-sm font-medium text-gray-900">
+                      {{ group.groupName }}
+                    </div>
+                  </td>
+
+                  <!-- Key Cell -->
+                  <td class="px-6 py-4">
+                    <div class="text-sm font-medium text-gray-900">
+                      {{ keyRow.key.key_name }}
+                    </div>
+                    <div *ngIf="keyRow.key.description" class="text-xs text-gray-500 mt-1">
+                      {{ keyRow.key.description }}
+                    </div>
+                    <div class="flex items-center space-x-2 mt-1">
+                      <span class="inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-medium"
+                            [class]="getDataTypeBadgeClass(keyRow.key.data_type)">
+                        {{ keyRow.key.data_type }}
+                      </span>
+                      <span *ngIf="keyRow.key.is_required"
+                            class="inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-medium bg-red-100 text-red-800">
+                        Required
+                      </span>
+                      <span *ngIf="keyRow.key.is_sensitive"
+                            class="inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-medium bg-yellow-100 text-yellow-800">
+                        Sensitive
+                      </span>
+                    </div>
+                  </td>
+
+                  <!-- Environment Value Cells -->
+                  <td *ngFor="let env of getDisplayEnvironments()"
+                      class="px-6 py-4 border-l border-gray-100">
+                    <div class="min-h-8">
+                      <ng-container *ngIf="keyRow.values[env.id] as configValue; else noValue">
+                        <!-- Editing Mode -->
+                        <div *ngIf="editingConfigId === configValue.id" class="space-y-2">
+                          <input
+                            type="text"
+                            [(ngModel)]="editingValue"
+                            class="w-full px-2 py-1 border border-gray-300 rounded-sm text-sm"
+                            [placeholder]="keyRow.key.default_value || 'Enter value'"
+                          >
+                          <div class="flex space-x-1">
+                            <button
+                              (click)="saveConfigValue(configValue.id)"
+                              class="text-xs text-green-600 hover:text-green-800 font-medium"
+                            >
+                              Save
+                            </button>
+                            <button
+                              (click)="cancelEdit()"
+                              class="text-xs text-gray-600 hover:text-gray-800"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+
+                        <!-- Display Mode -->
+                        <div *ngIf="editingConfigId !== configValue.id" class="group">
+                          <div class="flex items-center justify-between">
+                            <div class="flex-1 min-w-0">
+                              <span *ngIf="keyRow.key.is_sensitive" class="text-gray-500 text-sm">
+                                ••••••••
+                              </span>
+                              <span *ngIf="!keyRow.key.is_sensitive" class="text-sm text-gray-900 break-words">
+                                {{ configValue.value || 'Not set' }}
+                              </span>
+                            </div>
+                            <button
+                              (click)="startEdit(configValue)"
+                              class="ml-2 opacity-0 group-hover:opacity-100 text-blue-600 hover:text-blue-800 text-xs"
+                            >
+                              Edit
+                            </button>
+                          </div>
+                          <div class="text-xs text-gray-400 mt-1">
+                            v{{ configValue.version }}
+                          </div>
+                        </div>
+                      </ng-container>
+
+                      <!-- No Value Template -->
+                      <ng-template #noValue>
+                        <div class="group">
+                          <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-400 italic">Not configured</span>
+                            <button
+                              (click)="createConfigValue(keyRow.key.id, env.id)"
+                              class="ml-2 opacity-0 group-hover:opacity-100 text-green-600 hover:text-green-800 text-xs"
+                            >
+                              Add
+                            </button>
+                          </div>
+                        </div>
+                      </ng-template>
+                    </div>
+                  </td>
+                </tr>
+              </ng-container>
             </tbody>
           </table>
         </div>
 
         <!-- Empty State -->
-        <div *ngIf="configValues.length === 0 && !isLoading" class="px-6 py-12 text-center">
+        <div *ngIf="configMatrix.length === 0 && !isLoading" class="px-6 py-12 text-center">
           <div class="mx-auto h-12 w-12 text-gray-400">
             <svg fill="none" stroke="currentColor" viewBox="0 0 48 48">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5l7-7 7 7" />
             </svg>
           </div>
-          <h3 class="mt-2 text-sm font-medium text-gray-900">No configurations found</h3>
+          <h3 class="mt-2 text-sm font-medium text-gray-900">No configuration keys found</h3>
           <p class="mt-1 text-sm text-gray-500">
-            {{ selectedEnvironmentId ? 'No configurations for this environment' : 'No configurations available' }}
+            Create configuration keys first to manage their values across environments
           </p>
         </div>
       </div>
@@ -234,6 +287,8 @@ export class ConfigManagementComponent implements OnInit {
   application: Application | null = null;
   environments: Environment[] = [];
   configValues: ConfigValue[] = [];
+  configKeys: ConfigKey[] = [];
+  configMatrix: ConfigMatrix[] = [];
   selectedEnvironmentId: number | null = null;
   editingConfigId: number | null = null;
   editingValue: string = '';
@@ -254,8 +309,10 @@ export class ConfigManagementComponent implements OnInit {
     await Promise.all([
       this.loadApplication(),
       this.loadEnvironments(),
-      this.loadConfigValues()
+      this.loadConfigKeys()
     ]);
+    await this.loadConfigValues();
+    this.buildConfigMatrix();
   }
 
   async loadApplication() {
@@ -277,6 +334,15 @@ export class ConfigManagementComponent implements OnInit {
     }
   }
 
+  async loadConfigKeys() {
+    try {
+      this.configKeys = await this.supabaseService.getConfigKeys(this.applicationId);
+    } catch (error: any) {
+      this.errorMessage = 'Failed to load configuration keys';
+      console.error('Error loading config keys:', error);
+    }
+  }
+
   async loadConfigValues() {
     try {
       this.isLoading = true;
@@ -295,6 +361,47 @@ export class ConfigManagementComponent implements OnInit {
 
   async onEnvironmentChange() {
     await this.loadConfigValues();
+    this.buildConfigMatrix();
+  }
+
+  buildConfigMatrix() {
+    const groupMap = new Map<string, ConfigMatrix>();
+
+    // Process each config key
+    this.configKeys.forEach(key => {
+      const groupName = key.config_groups?.name || 'No Group';
+      const groupId = key.group_id || null;
+
+      if (!groupMap.has(groupName)) {
+        groupMap.set(groupName, {
+          groupName,
+          groupId,
+          keys: []
+        });
+      }
+
+      // Build values map for this key across environments
+      const values: { [environmentId: number]: ConfigValue | null } = {};
+
+      // Filter environments based on selection
+      const targetEnvironments = this.selectedEnvironmentId
+        ? this.environments.filter(env => env.id === this.selectedEnvironmentId)
+        : this.environments;
+
+      targetEnvironments.forEach(env => {
+        const configValue = this.configValues.find(cv =>
+          cv.config_key_id === key.id && cv.environment_id === env.id
+        );
+        values[env.id] = configValue || null;
+      });
+
+      groupMap.get(groupName)!.keys.push({
+        key,
+        values
+      });
+    });
+
+    this.configMatrix = Array.from(groupMap.values());
   }
 
   startEdit(configValue: ConfigValue) {
@@ -361,5 +468,38 @@ export class ConfigManagementComponent implements OnInit {
 
   getSensitiveConfigCount(): number {
     return this.configValues.filter(cv => cv.config_keys?.is_sensitive).length;
+  }
+
+  getDisplayEnvironments(): Environment[] {
+    return this.selectedEnvironmentId
+      ? this.environments.filter(env => env.id === this.selectedEnvironmentId)
+      : this.environments;
+  }
+
+  trackByGroup(index: number, group: ConfigMatrix): string {
+    return `${group.groupId}-${group.groupName}`;
+  }
+
+  trackByKey(index: number, keyRow: ConfigKeyRow): number {
+    return keyRow.key.id;
+  }
+
+  async createConfigValue(keyId: number, environmentId: number) {
+    try {
+      this.isLoading = true;
+      await this.supabaseService.createConfigValue({
+        config_key_id: keyId,
+        environment_id: environmentId,
+        value: '',
+        created_by: 'current_user' // In real app, get from auth
+      });
+      await this.loadConfigValues();
+      this.buildConfigMatrix();
+    } catch (error: any) {
+      this.errorMessage = 'Failed to create configuration value';
+      console.error('Error creating config value:', error);
+    } finally {
+      this.isLoading = false;
+    }
   }
 }
