@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { environment } from '../../environments/environment';
+import { ConfigService } from './config.service';
 
 @Injectable({
   providedIn: 'root'
@@ -8,11 +8,23 @@ import { environment } from '../../environments/environment';
 export class SupabaseService {
   private supabase: SupabaseClient;
 
-  constructor() {
+  constructor(private configService: ConfigService) {
+    this.initializeSupabase();
+  }
+
+  private async initializeSupabase() {
+    const config = await this.configService.getConfig();
     this.supabase = createClient(
-      environment.supabase.url,
-      environment.supabase.anonKey
+      config.supabase.url,
+      config.supabase.anonKey
     );
+
+    if (config.features.enableLogging) {
+      console.log('Supabase client initialized with config:', {
+        url: config.supabase.url,
+        hasAnonKey: !!config.supabase.anonKey
+      });
+    }
   }
 
   get client() {

@@ -1,0 +1,15 @@
+{
+  "production": false,
+  "supabase": {
+    "url": "https://bufybxbbtibyywoypkgl.supabase.co",
+    "anonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1ZnlieGJidGlieXl3b3lwa2dsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5NTM2MTYsImV4cCI6MjA3NDUyOTYxNn0.VDfO_PxuxhDkYjA_UoqIY0lrxWg-qaiulN8Co0Aa5YQ"
+  },
+  "api": {
+    "baseUrl": "http://localhost:3000",
+    "timeout": 30000
+  },
+  "features": {
+    "debugMode": true,
+    "enableLogging": true
+  }
+}
