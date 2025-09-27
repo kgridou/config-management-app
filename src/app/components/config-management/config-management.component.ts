@@ -66,15 +66,6 @@ interface ConfigRow {
           </label>
           <div class="flex flex-wrap gap-2">
             <button
-              (click)="selectConfigFile('')"
-              [class]="selectedConfigFileId === '' ?
-                'bg-blue-100 text-blue-800 border-blue-300' :
-                'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'"
-              class="px-3 py-1 border rounded-md text-sm font-medium transition-colors"
-            >
-              All Files
-            </button>
-            <button
               *ngFor="let file of configFiles"
               (click)="selectConfigFile(file.id.toString())"
               [class]="selectedConfigFileId === file.id.toString() ?
@@ -87,9 +78,12 @@ interface ConfigRow {
                 {{ file.file_format }}
               </span>
             </button>
+            <div *ngIf="configFiles.length === 0" class="text-sm text-gray-500 italic">
+              No configuration files found. Create some configuration keys first.
+            </div>
           </div>
-          <p class="text-sm text-gray-500 mt-2">
-            Select a configuration file to view only its settings, or "All Files" to see everything
+          <p *ngIf="configFiles.length > 0" class="text-sm text-gray-500 mt-2">
+            Select a configuration file to view its settings
           </p>
         </div>
       </div>
@@ -106,14 +100,14 @@ interface ConfigRow {
             <h2 class="text-xl font-semibold text-gray-900">Configuration Matrix</h2>
             <p class="text-sm text-gray-500 mt-1">
               {{ selectedEnvironmentId ? 'Single environment view' : 'All environments matrix view' }}
-              {{ selectedConfigFileId ? ' • ' + getSelectedFileName() : ' • All files' }}
+              {{ selectedConfigFileId ? ' • ' + getSelectedFileName() : '' }}
             </p>
           </div>
 
           <!-- Download Button -->
           <div class="flex space-x-2">
             <button
-              *ngIf="selectedConfigFileId !== ''"
+              *ngIf="configFiles.length > 0"
               (click)="downloadConfigFile()"
               class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
@@ -424,6 +418,10 @@ export class ConfigManagementComponent implements OnInit {
   async loadConfigFiles() {
     try {
       this.configFiles = await this.supabaseService.getConfigFiles(this.applicationId);
+      // Auto-select first config file if none selected
+      if (this.configFiles.length > 0 && this.selectedConfigFileId === '') {
+        this.selectedConfigFileId = this.configFiles[0].id.toString();
+      }
     } catch (error: any) {
       this.errorMessage = 'Failed to load configuration files';
       console.error('Error loading config files:', error);
