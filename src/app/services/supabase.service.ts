@@ -158,10 +158,16 @@ export class SupabaseService {
       query = query.eq('environment_id', environmentId);
     }
 
-    const { data, error } = await query.order('config_keys.key_name');
+    const { data, error } = await query;
 
     if (error) throw error;
-    return data;
+
+    // Sort the data client-side by key_name since PostgREST doesn't support ordering by joined columns
+    return data?.sort((a, b) => {
+      const keyNameA = a.config_keys?.key_name || '';
+      const keyNameB = b.config_keys?.key_name || '';
+      return keyNameA.localeCompare(keyNameB);
+    }) || [];
   }
 
   async createConfigValue(configValue: {
