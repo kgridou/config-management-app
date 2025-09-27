@@ -30,7 +30,7 @@ export interface ConfigFile {
 export interface ConfigGroup {
   id: number;
   name: string;
-  application_id: number;
+  config_file_id: number;
   description?: string;
   created_at: string;
 }
@@ -95,7 +95,7 @@ export interface CreateEnvironmentRequest {
 
 export interface CreateConfigGroupRequest {
   name: string;
-  application_id: number;
+  config_file_id: number;
   description?: string;
 }
 

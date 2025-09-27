@@ -54,33 +54,33 @@ BEGIN
     SELECT id INTO prod_env_id FROM environments WHERE name = 'production';
 
     -- Create configuration groups for e-commerce-api
-    INSERT INTO config_groups (name, application_id, description) VALUES
-        ('database', ecommerce_id, 'Database connection settings'),
-        ('redis', ecommerce_id, 'Redis cache configuration'),
-        ('api', ecommerce_id, 'API configuration and limits'),
-        ('security', ecommerce_id, 'Security and authentication settings'),
-        ('external-services', ecommerce_id, 'Third-party service integrations');
+    INSERT INTO config_groups (name, config_file_id, description) VALUES
+        ('database', (SELECT id FROM config_files WHERE name = 'database.json' AND application_id = ecommerce_id), 'Database connection settings'),
+        ('redis', (SELECT id FROM config_files WHERE name = 'api.yaml' AND application_id = ecommerce_id), 'Redis cache configuration'),
+        ('api', (SELECT id FROM config_files WHERE name = 'api.yaml' AND application_id = ecommerce_id), 'API configuration and limits'),
+        ('security', (SELECT id FROM config_files WHERE name = 'security.env' AND application_id = ecommerce_id), 'Security and authentication settings'),
+        ('external-services', (SELECT id FROM config_files WHERE name = 'external-services.json' AND application_id = ecommerce_id), 'Third-party service integrations');
 
     -- Create configuration groups for user-service
-    INSERT INTO config_groups (name, application_id, description) VALUES
-        ('database', user_service_id, 'User database configuration'),
-        ('auth', user_service_id, 'Authentication providers'),
-        ('session', user_service_id, 'Session management'),
-        ('security', user_service_id, 'Security policies');
+    INSERT INTO config_groups (name, config_file_id, description) VALUES
+        ('database', (SELECT id FROM config_files WHERE name = 'database.json' AND application_id = user_service_id), 'User database configuration'),
+        ('auth', (SELECT id FROM config_files WHERE name = 'auth.yaml' AND application_id = user_service_id), 'Authentication providers'),
+        ('session', (SELECT id FROM config_files WHERE name = 'session.env' AND application_id = user_service_id), 'Session management'),
+        ('security', (SELECT id FROM config_files WHERE name = 'security.env' AND application_id = user_service_id), 'Security policies');
 
     -- Create configuration groups for notification-service
-    INSERT INTO config_groups (name, application_id, description) VALUES
-        ('email', notification_id, 'Email service configuration'),
-        ('sms', notification_id, 'SMS provider settings'),
-        ('templates', notification_id, 'Message templates'),
-        ('queue', notification_id, 'Message queue settings');
+    INSERT INTO config_groups (name, config_file_id, description) VALUES
+        ('email', (SELECT id FROM config_files WHERE name = 'email.json' AND application_id = notification_id), 'Email service configuration'),
+        ('sms', (SELECT id FROM config_files WHERE name = 'sms.yaml' AND application_id = notification_id), 'SMS provider settings'),
+        ('templates', (SELECT id FROM config_files WHERE name = 'templates.yaml' AND application_id = notification_id), 'Message templates'),
+        ('queue', (SELECT id FROM config_files WHERE name = 'queue.json' AND application_id = notification_id), 'Message queue settings');
 
     -- Create configuration groups for payment-gateway
-    INSERT INTO config_groups (name, application_id, description) VALUES
-        ('providers', payment_id, 'Payment provider configurations'),
-        ('security', payment_id, 'PCI compliance and security'),
-        ('webhooks', payment_id, 'Webhook configurations'),
-        ('limits', payment_id, 'Transaction limits and rules');
+    INSERT INTO config_groups (name, config_file_id, description) VALUES
+        ('providers', (SELECT id FROM config_files WHERE name = 'providers.json' AND application_id = payment_id), 'Payment provider configurations'),
+        ('security', (SELECT id FROM config_files WHERE name = 'security.env' AND application_id = payment_id), 'PCI compliance and security'),
+        ('webhooks', (SELECT id FROM config_files WHERE name = 'webhooks.yaml' AND application_id = payment_id), 'Webhook configurations'),
+        ('limits', (SELECT id FROM config_files WHERE name = 'limits.json' AND application_id = payment_id), 'Transaction limits and rules');
 
     -- Create configuration files for e-commerce-api
     INSERT INTO config_files (name, application_id, file_format, description) VALUES

@@ -593,7 +593,7 @@ export class ConfigManagementComponent implements OnInit {
   // Form data
   newGroup: CreateConfigGroupRequest = {
     name: '',
-    application_id: 0,
+    config_file_id: 0,
     description: ''
   };
 
@@ -616,7 +616,6 @@ export class ConfigManagementComponent implements OnInit {
 
   async ngOnInit() {
     this.applicationId = Number(this.route.snapshot.paramMap.get('id'));
-    this.newGroup.application_id = this.applicationId;
     this.newConfigKey.application_id = this.applicationId;
     await this.loadData();
   }
@@ -625,9 +624,9 @@ export class ConfigManagementComponent implements OnInit {
     await Promise.all([
       this.loadApplication(),
       this.loadEnvironments(),
-      this.loadConfigFiles(),
-      this.loadConfigGroups()
+      this.loadConfigFiles()
     ]);
+    await this.loadConfigGroups();
     await this.loadConfigKeys();
     await this.loadConfigValues();
     this.buildConfigMatrix();
@@ -667,7 +666,11 @@ export class ConfigManagementComponent implements OnInit {
 
   async loadConfigGroups() {
     try {
-      this.configGroups = await this.supabaseService.getConfigGroups(this.applicationId);
+      if (this.selectedConfigFileId) {
+        this.configGroups = await this.supabaseService.getConfigGroups(Number(this.selectedConfigFileId));
+      } else {
+        this.configGroups = [];
+      }
     } catch (error: any) {
       this.errorMessage = 'Failed to load configuration groups';
       console.error('Error loading config groups:', error);
@@ -708,8 +711,10 @@ export class ConfigManagementComponent implements OnInit {
     this.buildConfigMatrix();
   }
 
-  selectConfigFile(fileId: string) {
+  async selectConfigFile(fileId: string) {
     this.selectedConfigFileId = fileId;
+    this.selectedGroupId = ''; // Reset group selection when file changes
+    await this.loadConfigGroups();
     this.onFilterChange();
   }
 

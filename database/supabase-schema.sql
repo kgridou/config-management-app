@@ -50,15 +50,15 @@ CREATE TABLE config_files (
     UNIQUE(name, application_id)
 );
 
--- Configuration groups for organizing related configs
+-- Configuration groups for organizing related configs within files
 CREATE TABLE config_groups (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    application_id BIGINT NOT NULL,
+    config_file_id BIGINT NOT NULL,
     description TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-    FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE CASCADE,
-    UNIQUE(name, application_id)
+    FOREIGN KEY (config_file_id) REFERENCES config_files(id) ON DELETE CASCADE,
+    UNIQUE(name, config_file_id)
 );
 
 -- Configuration keys (templates/definitions)

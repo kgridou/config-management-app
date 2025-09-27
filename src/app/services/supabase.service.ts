@@ -78,18 +78,18 @@ export class SupabaseService {
   }
 
   // Config Groups
-  async getConfigGroups(applicationId: number) {
+  async getConfigGroups(configFileId: number) {
     const { data, error } = await this.supabase
       .from('config_groups')
       .select('*')
-      .eq('application_id', applicationId)
+      .eq('config_file_id', configFileId)
       .order('name');
 
     if (error) throw error;
     return data;
   }
 
-  async createConfigGroup(group: { name: string; application_id: number; description?: string }) {
+  async createConfigGroup(group: { name: string; config_file_id: number; description?: string }) {
     const { data, error } = await this.supabase
       .from('config_groups')
       .insert(group)
