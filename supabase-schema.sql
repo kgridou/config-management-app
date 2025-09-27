@@ -4,6 +4,18 @@
 -- Enable Row Level Security
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO postgres, anon, authenticated, service_role;
 
+-- Users table for application users
+CREATE TABLE users (
+    id BIGSERIAL PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    full_name VARCHAR(255),
+    avatar_url TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    last_login TIMESTAMP WITH TIME ZONE,
+    is_active BOOLEAN DEFAULT TRUE
+);
+
 -- Applications/Services that have configurations
 CREATE TABLE applications (
     id BIGSERIAL PRIMARY KEY,
@@ -139,6 +151,7 @@ CREATE TRIGGER config_values_audit_trigger
     FOR EACH ROW EXECUTE FUNCTION log_config_changes();
 
 -- Row Level Security Policies (enable RLS for all tables)
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE applications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE environments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE config_groups ENABLE ROW LEVEL SECURITY;
@@ -147,6 +160,7 @@ ALTER TABLE config_values ENABLE ROW LEVEL SECURITY;
 ALTER TABLE config_history ENABLE ROW LEVEL SECURITY;
 
 -- Allow all operations for authenticated users (adjust as needed for your security requirements)
+CREATE POLICY "Allow all operations for authenticated users" ON users FOR ALL TO authenticated USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON applications FOR ALL TO authenticated USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON environments FOR ALL TO authenticated USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON config_groups FOR ALL TO authenticated USING (true);
