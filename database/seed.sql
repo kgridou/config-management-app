@@ -119,7 +119,7 @@ BEGIN
         ('db.username', (SELECT id FROM config_files WHERE name = 'database.json' AND application_id = ecommerce_id), (SELECT id FROM config_groups WHERE name = 'database' AND application_id = ecommerce_id), ecommerce_id, 'string', 'Database username', 'postgres', true, false),
         ('db.password', (SELECT id FROM config_files WHERE name = 'database.json' AND application_id = ecommerce_id), (SELECT id FROM config_groups WHERE name = 'database' AND application_id = ecommerce_id), ecommerce_id, 'encrypted', 'Database password', null, true, true),
         ('db.ssl_mode', (SELECT id FROM config_files WHERE name = 'database.json' AND application_id = ecommerce_id), (SELECT id FROM config_groups WHERE name = 'database' AND application_id = ecommerce_id), ecommerce_id, 'string', 'SSL connection mode', 'require', true, false),
-        ('db.pool_size', (SELECT id FROM config_groups WHERE name = 'database' AND application_id = ecommerce_id), ecommerce_id, 'integer', 'Connection pool size', '10', false, false),
+        ('db.pool_size', (SELECT id FROM config_files WHERE name = 'database.json' AND application_id = ecommerce_id), (SELECT id FROM config_groups WHERE name = 'database' AND application_id = ecommerce_id), ecommerce_id, 'integer', 'Connection pool size', '10', false, false),
 
         -- Redis group
         ('redis.host', (SELECT id FROM config_groups WHERE name = 'redis' AND application_id = ecommerce_id), ecommerce_id, 'string', 'Redis hostname', 'localhost', true, false),
