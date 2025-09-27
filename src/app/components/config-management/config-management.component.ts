@@ -8,6 +8,7 @@ import {
   Environment,
   ConfigValue,
   ConfigKey,
+  ConfigFile,
   CreateConfigValueRequest
 } from '../../models/config.models';
 
@@ -38,25 +39,59 @@ interface ConfigRow {
         <p *ngIf="application?.description" class="text-gray-600">{{ application?.description }}</p>
       </div>
 
-      <!-- Environment Filter -->
-      <div class="bg-white p-4 rounded-lg shadow-md mb-6">
-        <label for="environment" class="block text-sm font-medium text-gray-700 mb-2">
-          Environment Filter
-        </label>
-        <select
-          id="environment"
-          [(ngModel)]="selectedEnvironmentId"
-          (change)="onEnvironmentChange()"
-          class="w-full md:w-auto px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">All Environments</option>
-          <option *ngFor="let env of environments" [value]="env.id">
-            {{ env.name }} (Priority: {{ env.priority }})
-          </option>
-        </select>
-        <p class="text-sm text-gray-500 mt-1">
-          Select an environment to view only its configurations, or leave blank to see all environments in matrix view
-        </p>
+      <!-- Filters -->
+      <div class="bg-white p-4 rounded-lg shadow-md mb-6 space-y-4">
+        <!-- Environment Filter -->
+        <div>
+          <label for="environment" class="block text-sm font-medium text-gray-700 mb-2">
+            Environment Filter
+          </label>
+          <select
+            id="environment"
+            [(ngModel)]="selectedEnvironmentId"
+            (change)="onFilterChange()"
+            class="w-full md:w-auto px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">All Environments</option>
+            <option *ngFor="let env of environments" [value]="env.id">
+              {{ env.name }} (Priority: {{ env.priority }})
+            </option>
+          </select>
+        </div>
+
+        <!-- Config File Filter -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Configuration File
+          </label>
+          <div class="flex flex-wrap gap-2">
+            <button
+              (click)="selectConfigFile('')"
+              [class]="selectedConfigFileId === '' ?
+                'bg-blue-100 text-blue-800 border-blue-300' :
+                'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'"
+              class="px-3 py-1 border rounded-md text-sm font-medium transition-colors"
+            >
+              All Files
+            </button>
+            <button
+              *ngFor="let file of configFiles"
+              (click)="selectConfigFile(file.id.toString())"
+              [class]="selectedConfigFileId === file.id.toString() ?
+                'bg-blue-100 text-blue-800 border-blue-300' :
+                'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'"
+              class="px-3 py-1 border rounded-md text-sm font-medium transition-colors flex items-center space-x-1"
+            >
+              <span>{{ file.name }}</span>
+              <span class="inline-flex items-center px-1 py-0.5 rounded text-xs bg-gray-200 text-gray-600">
+                {{ file.file_format }}
+              </span>
+            </button>
+          </div>
+          <p class="text-sm text-gray-500 mt-2">
+            Select a configuration file to view only its settings, or "All Files" to see everything
+          </p>
+        </div>
       </div>
 
       <!-- Error Message -->
@@ -66,11 +101,37 @@ interface ConfigRow {
 
       <!-- Configuration Matrix -->
       <div class="bg-white rounded-lg shadow-md overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h2 class="text-xl font-semibold text-gray-900">Configuration Matrix</h2>
-          <p class="text-sm text-gray-500 mt-1">
-            {{ selectedEnvironmentId ? 'Single environment view' : 'All environments matrix view' }}
-          </p>
+        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+          <div>
+            <h2 class="text-xl font-semibold text-gray-900">Configuration Matrix</h2>
+            <p class="text-sm text-gray-500 mt-1">
+              {{ selectedEnvironmentId ? 'Single environment view' : 'All environments matrix view' }}
+              {{ selectedConfigFileId ? ' • ' + getSelectedFileName() : ' • All files' }}
+            </p>
+          </div>
+
+          <!-- Download Button -->
+          <div class="flex space-x-2">
+            <button
+              *ngIf="selectedConfigFileId !== ''"
+              (click)="downloadConfigFile()"
+              class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              Download {{ getSelectedFileName() }}
+            </button>
+            <button
+              (click)="downloadAllFiles()"
+              class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+              </svg>
+              Download All
+            </button>
+          </div>
         </div>
 
         <div class="overflow-x-auto">
@@ -311,8 +372,10 @@ export class ConfigManagementComponent implements OnInit {
   environments: Environment[] = [];
   configValues: ConfigValue[] = [];
   configKeys: ConfigKey[] = [];
+  configFiles: ConfigFile[] = [];
   configMatrix: ConfigMatrix[] = [];
   selectedEnvironmentId: string = '';
+  selectedConfigFileId: string = '';
   editingConfigId: number | null = null;
   editingValue: string = '';
   isLoading = false;
@@ -332,8 +395,9 @@ export class ConfigManagementComponent implements OnInit {
     await Promise.all([
       this.loadApplication(),
       this.loadEnvironments(),
-      this.loadConfigKeys()
+      this.loadConfigFiles()
     ]);
+    await this.loadConfigKeys();
     await this.loadConfigValues();
     this.buildConfigMatrix();
   }
@@ -357,9 +421,21 @@ export class ConfigManagementComponent implements OnInit {
     }
   }
 
+  async loadConfigFiles() {
+    try {
+      this.configFiles = await this.supabaseService.getConfigFiles(this.applicationId);
+    } catch (error: any) {
+      this.errorMessage = 'Failed to load configuration files';
+      console.error('Error loading config files:', error);
+    }
+  }
+
   async loadConfigKeys() {
     try {
-      this.configKeys = await this.supabaseService.getConfigKeys(this.applicationId);
+      this.configKeys = await this.supabaseService.getConfigKeys(
+        this.applicationId,
+        this.selectedConfigFileId !== '' ? Number(this.selectedConfigFileId) : undefined
+      );
     } catch (error: any) {
       this.errorMessage = 'Failed to load configuration keys';
       console.error('Error loading config keys:', error);
@@ -382,9 +458,15 @@ export class ConfigManagementComponent implements OnInit {
     }
   }
 
-  async onEnvironmentChange() {
+  async onFilterChange() {
+    await this.loadConfigKeys();
     await this.loadConfigValues();
     this.buildConfigMatrix();
+  }
+
+  selectConfigFile(fileId: string) {
+    this.selectedConfigFileId = fileId;
+    this.onFilterChange();
   }
 
   buildConfigMatrix() {
@@ -528,5 +610,134 @@ export class ConfigManagementComponent implements OnInit {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  getSelectedFileName(): string {
+    const file = this.configFiles.find(f => f.id.toString() === this.selectedConfigFileId);
+    return file?.name || '';
+  }
+
+  downloadConfigFile() {
+    if (this.selectedConfigFileId === '') return;
+
+    const file = this.configFiles.find(f => f.id.toString() === this.selectedConfigFileId);
+    if (!file) return;
+
+    const targetEnvironments = this.selectedEnvironmentId !== ''
+      ? this.environments.filter(env => env.id === Number(this.selectedEnvironmentId))
+      : this.environments;
+
+    // Get configs for selected file
+    const fileConfigs = this.configKeys
+      .filter(key => key.config_file_id.toString() === this.selectedConfigFileId)
+      .map(key => {
+        const envValues: { [key: string]: any } = {};
+
+        targetEnvironments.forEach(env => {
+          const configValue = this.configValues.find(cv =>
+            cv.config_key_id === key.id && cv.environment_id === env.id
+          );
+          envValues[env.name] = configValue?.value || key.default_value || null;
+        });
+
+        return {
+          key: key.key_name,
+          description: key.description,
+          type: key.data_type,
+          required: key.is_required,
+          sensitive: key.is_sensitive,
+          environments: envValues
+        };
+      });
+
+    this.downloadFile(fileConfigs, file.name, file.file_format);
+  }
+
+  downloadAllFiles() {
+    const targetEnvironments = this.selectedEnvironmentId !== ''
+      ? this.environments.filter(env => env.id === Number(this.selectedEnvironmentId))
+      : this.environments;
+
+    this.configFiles.forEach(file => {
+      const fileConfigs = this.configKeys
+        .filter(key => key.config_file_id === file.id)
+        .map(key => {
+          const envValues: { [key: string]: any } = {};
+
+          targetEnvironments.forEach(env => {
+            const configValue = this.configValues.find(cv =>
+              cv.config_key_id === key.id && cv.environment_id === env.id
+            );
+            envValues[env.name] = configValue?.value || key.default_value || null;
+          });
+
+          return {
+            key: key.key_name,
+            description: key.description,
+            type: key.data_type,
+            required: key.is_required,
+            sensitive: key.is_sensitive,
+            environments: envValues
+          };
+        });
+
+      if (fileConfigs.length > 0) {
+        this.downloadFile(fileConfigs, file.name, file.file_format);
+      }
+    });
+  }
+
+  private downloadFile(configs: any[], fileName: string, format: string) {
+    let content: string;
+    let mimeType: string;
+
+    switch (format) {
+      case 'json':
+        content = JSON.stringify(configs, null, 2);
+        mimeType = 'application/json';
+        break;
+      case 'yaml':
+        // Simple YAML conversion (for demo - in production use proper YAML library)
+        content = configs.map(config => {
+          const yaml = [`${config.key}:`];
+          if (config.description) yaml.push(`  # ${config.description}`);
+          Object.entries(config.environments).forEach(([env, value]) => {
+            yaml.push(`  ${env}: ${JSON.stringify(value)}`);
+          });
+          return yaml.join('\n');
+        }).join('\n\n');
+        mimeType = 'application/x-yaml';
+        break;
+      case 'env':
+        content = configs.map(config => {
+          return Object.entries(config.environments).map(([env, value]) => {
+            const key = config.key.toUpperCase().replace(/\./g, '_');
+            return `${key}=${value || ''}`;
+          }).join('\n');
+        }).join('\n');
+        mimeType = 'text/plain';
+        break;
+      case 'properties':
+        content = configs.map(config => {
+          return Object.entries(config.environments).map(([env, value]) => {
+            return `${config.key}=${value || ''}`;
+          }).join('\n');
+        }).join('\n');
+        mimeType = 'text/plain';
+        break;
+      default:
+        content = JSON.stringify(configs, null, 2);
+        mimeType = 'application/json';
+    }
+
+    const blob = new Blob([content], { type: mimeType });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
   }
 }

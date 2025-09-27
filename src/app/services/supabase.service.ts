@@ -100,16 +100,51 @@ export class SupabaseService {
     return data;
   }
 
-  // Config Keys
-  async getConfigKeys(applicationId: number) {
+  // Config Files
+  async getConfigFiles(applicationId: number) {
     const { data, error } = await this.supabase
+      .from('config_files')
+      .select('*')
+      .eq('application_id', applicationId)
+      .eq('is_active', true)
+      .order('name');
+
+    if (error) throw error;
+    return data;
+  }
+
+  async createConfigFile(configFile: {
+    name: string;
+    application_id: number;
+    file_format?: string;
+    description?: string;
+  }) {
+    const { data, error } = await this.supabase
+      .from('config_files')
+      .insert(configFile)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
+  // Config Keys
+  async getConfigKeys(applicationId: number, configFileId?: number) {
+    let query = this.supabase
       .from('config_keys')
       .select(`
         *,
-        config_groups:group_id (name)
+        config_groups:group_id (name),
+        config_files:config_file_id (name, file_format)
       `)
-      .eq('application_id', applicationId)
-      .order('key_name');
+      .eq('application_id', applicationId);
+
+    if (configFileId) {
+      query = query.eq('config_file_id', configFileId);
+    }
+
+    const { data, error } = await query.order('key_name');
 
     if (error) throw error;
     return data;

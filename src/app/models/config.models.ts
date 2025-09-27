@@ -16,6 +16,17 @@ export interface Environment {
   is_active: boolean;
 }
 
+export interface ConfigFile {
+  id: number;
+  name: string;
+  application_id: number;
+  file_format: 'json' | 'yaml' | 'env' | 'properties';
+  description?: string;
+  created_at: string;
+  updated_at: string;
+  is_active: boolean;
+}
+
 export interface ConfigGroup {
   id: number;
   name: string;
@@ -27,6 +38,7 @@ export interface ConfigGroup {
 export interface ConfigKey {
   id: number;
   key_name: string;
+  config_file_id: number;
   group_id?: number;
   application_id: number;
   data_type: 'string' | 'integer' | 'boolean' | 'json' | 'encrypted';
@@ -38,6 +50,7 @@ export interface ConfigKey {
   created_at: string;
   updated_at: string;
   config_groups?: { name: string };
+  config_files?: { name: string; file_format: string };
 }
 
 export interface ConfigValue {
@@ -86,8 +99,16 @@ export interface CreateConfigGroupRequest {
   description?: string;
 }
 
+export interface CreateConfigFileRequest {
+  name: string;
+  application_id: number;
+  file_format?: 'json' | 'yaml' | 'env' | 'properties';
+  description?: string;
+}
+
 export interface CreateConfigKeyRequest {
   key_name: string;
+  config_file_id: number;
   application_id: number;
   group_id?: number;
   data_type: 'string' | 'integer' | 'boolean' | 'json' | 'encrypted';
