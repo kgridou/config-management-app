@@ -53,8 +53,8 @@ export class GuestGuard implements CanActivate {
           return true; // User is not authenticated, allow access to guest pages
         }
 
-        // User is authenticated, redirect to main app
-        this.router.navigate(['/applications']);
+        // User is authenticated, redirect to dashboard
+        this.router.navigate(['/dashboard']);
         return false;
       })
     );
